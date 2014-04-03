@@ -39,7 +39,7 @@ import static com.sun.btrace.BTraceUtils.*;
         method="/.*/"
     )
     public static void m(@ProbeClassName String probeClass, @ProbeMethodName String probeMethod) {
-        print(strcat("entered ", probeClass));
-        println(strcat(".", probeMethod));
+        print(Strings.strcat("entered ", probeClass));
+        println(Strings.strcat(".", probeMethod));
     }
 } 

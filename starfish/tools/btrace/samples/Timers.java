@@ -36,18 +36,18 @@ import static com.sun.btrace.BTraceUtils.*;
 
    // when starting print the target VM version and start time
    static {
-       println(strcat("vm version ", vmVersion()));
-       println(strcat("vm starttime ", str(vmStartTime())));
+       println(Strings.strcat("vm version ", Sys.VM.vmVersion()));
+       println(Strings.strcat("vm starttime ", Strings.str(Sys.VM.vmStartTime())));
    }
 
    @OnTimer(1000) 
    public static void f() {
-     println(strcat("1000 msec: ", str(vmUptime())));
+     println(Strings.strcat("1000 msec: ", Strings.str(Sys.VM.vmUptime())));
    }
 
    @OnTimer(3000) 
    public static void f1() {
-     println(strcat("3000 msec: ", str(timeMillis())));
+     println(Strings.strcat("3000 msec: ", Strings.str(Time.millis())));
    }
 
 }

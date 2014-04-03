@@ -34,7 +34,7 @@ import static com.sun.btrace.BTraceUtils.*;
         method="<init>"
     ) 
     public static void onnew(@Self Object obj) {
-        println(concat("object of: ", name(classOf(obj))));
-        println(concat("size: ", str(sizeof(obj))));
+        println(Strings.concat("object of: ", Reflective.name(Reflective.classOf(obj))));
+        println(Strings.concat("size: ", Strings.str(sizeof(obj))));
     }
 }

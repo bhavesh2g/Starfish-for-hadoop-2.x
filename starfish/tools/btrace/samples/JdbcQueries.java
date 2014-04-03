@@ -25,35 +25,16 @@
 
 package com.sun.btrace.samples;
 
-import static com.sun.btrace.BTraceUtils.$;
-import static com.sun.btrace.BTraceUtils.addToAggregation;
-import static com.sun.btrace.BTraceUtils.get;
-import static com.sun.btrace.BTraceUtils.jstackStr;
-import static com.sun.btrace.BTraceUtils.newAggregation;
-import static com.sun.btrace.BTraceUtils.newAggregationKey;
-import static com.sun.btrace.BTraceUtils.newWeakMap;
-import static com.sun.btrace.BTraceUtils.print;
-import static com.sun.btrace.BTraceUtils.printAggregation;
-import static com.sun.btrace.BTraceUtils.println;
-import static com.sun.btrace.BTraceUtils.put;
-import static com.sun.btrace.BTraceUtils.str;
-import static com.sun.btrace.BTraceUtils.strcmp;
+import static com.sun.btrace.BTraceUtils.*;
 
 import java.sql.Statement;
 import java.util.Map;
 
 import com.sun.btrace.AnyType;
-import com.sun.btrace.BTraceUtils;
 import com.sun.btrace.aggregation.Aggregation;
 import com.sun.btrace.aggregation.AggregationFunction;
 import com.sun.btrace.aggregation.AggregationKey;
-import com.sun.btrace.annotations.BTrace;
-import com.sun.btrace.annotations.Duration;
-import com.sun.btrace.annotations.Kind;
-import com.sun.btrace.annotations.Location;
-import com.sun.btrace.annotations.OnEvent;
-import com.sun.btrace.annotations.OnMethod;
-import com.sun.btrace.annotations.TLS;
+import com.sun.btrace.annotations.*;
 
 /**
  * BTrace script to print timings for all executed JDBC statements on an event. Demonstrates
@@ -65,21 +46,21 @@ import com.sun.btrace.annotations.TLS;
 @BTrace
 public class JdbcQueries {
 
-    private static Map<Statement, String> preparedStatementDescriptions = newWeakMap();
+    private static Map<Statement, String> preparedStatementDescriptions = Collections.newWeakMap();
 
-    private static Aggregation histogram = newAggregation(AggregationFunction.QUANTIZE);
+    private static Aggregation histogram = Aggregations.newAggregation(AggregationFunction.QUANTIZE);
 
-    private static Aggregation average = newAggregation(AggregationFunction.AVERAGE);
+    private static Aggregation average = Aggregations.newAggregation(AggregationFunction.AVERAGE);
 
-    private static Aggregation max = newAggregation(AggregationFunction.MAXIMUM);
+    private static Aggregation max = Aggregations.newAggregation(AggregationFunction.MAXIMUM);
 
-    private static Aggregation min = newAggregation(AggregationFunction.MINIMUM);
+    private static Aggregation min = Aggregations.newAggregation(AggregationFunction.MINIMUM);
 
-    private static Aggregation sum = newAggregation(AggregationFunction.SUM);
+    private static Aggregation sum = Aggregations.newAggregation(AggregationFunction.SUM);
 
-    private static Aggregation count = newAggregation(AggregationFunction.COUNT);
+    private static Aggregation count = Aggregations.newAggregation(AggregationFunction.COUNT);
 
-    private static Aggregation globalCount = newAggregation(AggregationFunction.COUNT);
+    private static Aggregation globalCount = Aggregations.newAggregation(AggregationFunction.COUNT);
 
     @TLS
     private static String preparingStatement;
@@ -92,7 +73,7 @@ public class JdbcQueries {
      * 
      * Otherwise we print the SQL.
      */
-    private static boolean useStackTrace = $(2) != null && strcmp("--stack", $(2)) == 0;
+    private static boolean useStackTrace = Sys.$(2) != null && Strings.strcmp("--stack", Sys.$(2)) == 0;
 
     // The first couple of probes capture whenever prepared statement and callable statements are
     // instantiated, in order to let us track what SQL they contain.
@@ -103,9 +84,9 @@ public class JdbcQueries {
      * @param args
      *            the list of method parameters. args[1] is the SQL.
      */
-    @OnMethod(clazz = "+java.sql.Connection", method = "/prepare.*/")
+    @OnMethod(clazz = "+java.sql.Connection", method = "/prepare(Call|Statement)/")
     public static void onPrepare(AnyType[] args) {
-        preparingStatement = useStackTrace ? jstackStr() : str(args[1]);
+        preparingStatement = useStackTrace ? Threads.jstackStr() : str(args[0]);
     }
 
     /**
@@ -114,12 +95,11 @@ public class JdbcQueries {
      * @param arg
      *            the return value from the prepareXxx() method.
      */
-    @OnMethod(clazz = "+java.sql.Connection", method = "/prepare.*/", location = @Location(Kind.RETURN))
-    public static void onPrepareReturn(AnyType arg) {
+    @OnMethod(clazz = "+java.sql.Connection", method = "/prepare(Call|Statement)/", location = @Location(Kind.RETURN))
+    public static void onPrepareReturn(@Return Statement preparedStatement) {
         if (preparingStatement != null) {
-            print("P"); // Debug Prepared
-            Statement preparedStatement = (Statement) arg;
-            put(preparedStatementDescriptions, preparedStatement, preparingStatement);
+//             print("P"); // Debug Prepared
+            Collections.put(preparedStatementDescriptions, preparedStatement, preparingStatement);
             preparingStatement = null;
         }
     }
@@ -128,37 +108,36 @@ public class JdbcQueries {
     // then it must be a prepared statement or callable statement. Get the SQL from the probes up above.
     // Otherwise the SQL is in the first argument.
 
-    @OnMethod(clazz = "+java.sql.Statement", method = "/execute.*/")
-    public static void onExecute(AnyType[] args) {
-        if (args.length == 1) {
+    @OnMethod(clazz = "+java.sql.Statement", method = "/execute($|Update|Query|Batch)/")
+    public static void onExecute(@Self Object currentStatement, AnyType[] args) {
+        if (args.length == 0) {
             // No SQL argument; lookup the SQL from the prepared statement
-            Statement currentStatement = (Statement) args[0]; // this
-            executingStatement = get(preparedStatementDescriptions, currentStatement);
+            executingStatement = Collections.get(preparedStatementDescriptions, currentStatement);
         } else {
             // Direct SQL in the first argument
-            executingStatement = useStackTrace ? jstackStr() : str(args[1]);
+            executingStatement = useStackTrace ? Threads.jstackStr() : str(args[0]);
         }
     }
 
-    @OnMethod(clazz = "+java.sql.Statement", method = "/execute.*/", location = @Location(Kind.RETURN))
+    @OnMethod(clazz = "+java.sql.Statement", method = "/execute($|Update|Query|Batch)/", location = @Location(Kind.RETURN))
     public static void onExecuteReturn(@Duration long durationL) {
 
         if (executingStatement == null) {
             return;
         }
 
-        print("X"); // Debug Executed
+//        print("X"); // Debug Executed
 
-        AggregationKey key = newAggregationKey(executingStatement);
+        AggregationKey key = Aggregations.newAggregationKey(executingStatement);
         int duration = (int) durationL / 1000;
 
-        addToAggregation(histogram, key, duration);
-        addToAggregation(average, key, duration);
-        addToAggregation(max, key, duration);
-        addToAggregation(min, key, duration);
-        addToAggregation(sum, key, duration);
-        addToAggregation(count, key, duration);
-        addToAggregation(globalCount, duration);
+        Aggregations.addToAggregation(histogram, key, duration);
+        Aggregations.addToAggregation(average, key, duration);
+        Aggregations.addToAggregation(max, key, duration);
+        Aggregations.addToAggregation(min, key, duration);
+        Aggregations.addToAggregation(sum, key, duration);
+        Aggregations.addToAggregation(count, key, duration);
+        Aggregations.addToAggregation(globalCount, duration);
 
         executingStatement = null;
     }
@@ -167,16 +146,16 @@ public class JdbcQueries {
     public static void onEvent() {
 
         // Top 10 queries only
-        BTraceUtils.truncateAggregation(histogram, 10);
+        Aggregations.truncateAggregation(histogram, 10);
 
         println("---------------------------------------------");
-        printAggregation("Count", count);
-        printAggregation("Min", min);
-        printAggregation("Max", max);
-        printAggregation("Average", average);
-        printAggregation("Sum", sum);
-        printAggregation("Histogram", histogram);
-        printAggregation("Global Count", globalCount);
+        Aggregations.printAggregation("Count", count);
+        Aggregations.printAggregation("Min", min);
+        Aggregations.printAggregation("Max", max);
+        Aggregations.printAggregation("Average", average);
+        Aggregations.printAggregation("Sum", sum);
+        Aggregations.printAggregation("Histogram", histogram);
+        Aggregations.printAggregation("Global Count", globalCount);
         println("---------------------------------------------");
     }
 

@@ -45,7 +45,7 @@ import java.io.FileOutputStream;
         method="<init>"
     )
     public static void onNewFileInputStream(@Self FileInputStream self, File f) {
-        name = str(f);
+        name = Strings.str(f);
     }
 
     @OnMethod(
@@ -56,7 +56,7 @@ import java.io.FileOutputStream;
     )
     public static void onNewFileInputStreamReturn() {
         if (name != null) {
-            println(strcat("opened for read ", name));
+            println(Strings.strcat("opened for read ", name));
             name = null;
         }
     }
@@ -77,7 +77,7 @@ import java.io.FileOutputStream;
     )
     public static void OnNewFileOutputStreamReturn() {
         if (name != null) {
-            println(strcat("opened for write ", name));
+            println(Strings.strcat("opened for write ", name));
             name = null;
         }
     }

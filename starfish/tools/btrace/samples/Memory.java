@@ -39,8 +39,8 @@ import static com.sun.btrace.BTraceUtils.*;
     @OnTimer(4000)
     public static void printMem() {
         println("Heap:");
-        println(heapUsage());
+        println(Sys.Memory.heapUsage());
         println("Non-Heap:");
-        println(nonHeapUsage());
+        println(Sys.Memory.nonHeapUsage());
     }
 }

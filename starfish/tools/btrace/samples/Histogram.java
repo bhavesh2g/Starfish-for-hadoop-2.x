@@ -36,26 +36,26 @@ import java.util.concurrent.atomic.AtomicInteger;
  * every 4 seconds.
  */
 @BTrace public class Histogram {
-   private static Map<String, AtomicInteger> histo = newHashMap();
+   private static Map<String, AtomicInteger> histo = Collections.newHashMap();
 
     @OnMethod(
         clazz="javax.swing.JComponent",
         method="<init>"
     ) 
     public static void onnewObject(@Self Object obj) {
-        String cn = name(classOf(obj));
-        AtomicInteger ai = get(histo, cn);
+        String cn = Reflective.name(classOf(obj));
+        AtomicInteger ai = Collections.get(histo, cn);
         if (ai == null) {
-            ai = newAtomicInteger(1);
-            put(histo, cn, ai);
+            ai = Atomic.newAtomicInteger(1);
+            Collections.put(histo, cn, ai);
         } else {
-            incrementAndGet(ai);
+            Atomic.incrementAndGet(ai);
         }     
     }
 
     @OnTimer(4000) 
     public static void print() {
-        if (size(histo) != 0) {
+        if (Collections.size(histo) != 0) {
             printNumberMap("Component Histogram", histo);
         }
     }
