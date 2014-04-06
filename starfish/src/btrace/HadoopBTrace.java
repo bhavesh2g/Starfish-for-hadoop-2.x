@@ -173,6 +173,7 @@ public class HadoopBTrace {
 	 * **********************************************************/
 	@TLS private static long mapInputDuration = 0l;
 
+        /*
 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
 			method = "run", 
 			location = @Location(value = Kind.ENTRY))
@@ -184,6 +185,7 @@ public class HadoopBTrace {
 			println("MAP\tNOT_FILE_SPLIT\t0");
 		}
 	}
+        */
 		
 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.MapContext", 
 			method = "nextKeyValue", 
@@ -222,9 +224,10 @@ public class HadoopBTrace {
 		mapProcessingStartTime = timeNanos();
 	}
 
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
-			method = "run", 
-			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="map"))
+	//@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+	//		method = "run", 
+	//		location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="map"))
+        /* 
 	public static void onMapper_run_After_Call_map(AnyType k, AnyType v, AnyType c) {
 		try {
 			if (k != null)
@@ -235,6 +238,7 @@ public class HadoopBTrace {
 		
 		mapProcessingDuration += timeNanos() - mapProcessingStartTime;
 	}
+        */
 
 	
 	/* ***********************************************************
@@ -289,18 +293,20 @@ public class HadoopBTrace {
 	@TLS private static long mapOutputKByteCount = 0l;
 	@TLS private static long mapOutputVByteCount = 0l;
 
+        /*
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewDirectOutputCollector", 
 			method = "write", 
 			location = @Location(value = Kind.RETURN))
 	public static void onNewDirectOutputCollector_write_return(@Duration long duration, AnyType k, AnyType v) {
 		mapCollectorWriteDuration += duration;
-		try {
+		//try {
 			if (k != null)
 				mapOutputKByteCount += k.toString().getBytes("UTF-8").length;
 			if (v != null)
 				mapOutputVByteCount += v.toString().getBytes("UTF-8").length;
-		} catch (Exception e) {}
+		//} catch (Exception e) {}
 	}
+        */
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewDirectOutputCollector", 
 			method = "close", 
@@ -676,20 +682,22 @@ public class HadoopBTrace {
 	@TLS private static long reduceWriteKByteCount = 0l;
 	@TLS private static long reduceWriteVByteCount = 0l;
 	
+        /*
 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$NewTrackingRecordWriter", 
 			method = "write", 
 			location = @Location(value = Kind.RETURN))
 	public static void onNewTrackingRecordWriter_write_return(@Duration long duration, AnyType k, AnyType v) {
 		if (onReducer) {
 			reduceWriteDuration += duration;
-			try {
+			//try {
 				if (k != null)
 					reduceWriteKByteCount += k.toString().getBytes("UTF-8").length;
 				if (v != null)
 					reduceWriteVByteCount += v.toString().getBytes("UTF-8").length;
-			} catch (Exception e) {}
+			//} catch (Exception e) {}
 		}
 	}
+        */
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
 			method = "runNewReducer", 
