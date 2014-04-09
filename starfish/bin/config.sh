@@ -16,11 +16,11 @@
 # The btrace install directory on the slave machines
 # Specify a FULL path! This setting is required!
 # Example: SLAVES_BTRACE_DIR=/root/btrace
-SLAVES_BTRACE_DIR=
+SLAVES_BTRACE_DIR=/home/hadoop/starfish/starfish/hadoop-btrace
 
 # A descriptive name for the cluster, like test, production, etc.
 # No spaces or special characters in the name. This setting is required!
-CLUSTER_NAME=
+CLUSTER_NAME=cluster4
 
 
 ###################################################################
