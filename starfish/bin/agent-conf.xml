@@ -45,7 +45,17 @@
                 <name>btrace.profile.dir</name>
                 <value>/home/hadoop/btrace</value>
         </property>
-        <!--
+        <property>
+		<name>mapreduce.task.profile</name>
+		<value>true</value>
+	</property>
+	<!--
+	<property>
+		<name>mapreduce.task.profile.params</name>
+		<value>-javaagent:/home/hadoop/starfish/starfish/hadoop-btrace/btrace-agent.jar=debug=true,unsafe=true,noServer=true,script=/home/hadoop/starfish/starfish/hadoop-btrace/HadoopBTrace.class</value>
+	</property>
+	-->
+	<!--
 	<property>
                 <name>mapred.child.java.opts</name>
                 <value>-Xmx200m -Djava.io.tmpdir=./mytmp -javaagent:/home/hadoop/btrace/btrace-agent.jar=dumpClasses=true,debug=true,unsafe=true,noServer=true,script=/home/hadoop/btrace/HadoopBTrace.class,stdout=aa.log
@@ -54,7 +64,7 @@
         -->
 	<property>
                 <name>mapred.child.java.opts</name>
-                <value>-Xmx200m -javaagent:/home/hadoop/starfish/starfish/hadoop-btrace/btrace-agent.jar=debug=true,unsafe=true,noServer=true,script=/home/hadoop/starfish/starfish/hadoop-btrace/HadoopBTrace.class,stdout=btrace.log,scriptOutput=results</value>
+                <value>-Xmx200m -javaagent:/home/hadoop/starfish/starfish/hadoop-btrace/btrace-agent.jar=debug=false,unsafe=true,stdout=result.btrace,noServer=true,script=/home/hadoop/starfish/starfish/hadoop-btrace/HadoopBTrace.class,scriptOutputFile=./results.btrace</value>
         </property>
-
+	
 	</configuration>
