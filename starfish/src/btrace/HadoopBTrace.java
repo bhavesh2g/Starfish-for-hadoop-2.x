@@ -5,9 +5,9 @@ import static com.sun.btrace.BTraceUtils.timeNanos;
 import static com.sun.btrace.BTraceUtils.used;
 import static com.sun.btrace.BTraceUtils.heapUsage;
 
-// import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
-// import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.sun.btrace.AnyType;
 import com.sun.btrace.annotations.BTrace;
@@ -34,40 +34,40 @@ import com.sun.btrace.annotations.Where;
  *  
  * @author hero
  */
-@BTrace
+@BTrace(unsafe=true)
 public class HadoopBTrace {
 
 	/*************************************************************************/
 	/***************************** TEST        *******************************/
 	/*************************************************************************/
 
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
-			method = "run", 
-			location = @Location(value = Kind.ENTRY))
-	public static void onJobClient_submitJobInternal_entry() {
-		println("---TEST MAPPER RUN");
-	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+	// 		method = "run", 
+	// 		location = @Location(value = Kind.ENTRY))
+	// public static void onJobClient_submitJobInternal_entry() {
+	// 	println("---TEST MAPPER RUN");
+	// }
 
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
-			method = "map", 
-			location = @Location(value = Kind.ENTRY))
-	public static void onJobClient_map_entry() {
-		println("---TEST MAPPER MAP");
-	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+	// 		method = "map", 
+	// 		location = @Location(value = Kind.ENTRY))
+	// public static void onJobClient_map_entry() {
+	// 	println("---TEST MAPPER MAP");
+	// }
 
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.JobSubmitter", 
-			method = "writeNewSplits", 
-			location = @Location(value = Kind.ENTRY))
-	public static void onJobSubmitter_writeNewSplits_entry(AnyType input) {
-		println("---TEST JOBSUBMITTER WRITENEWSPLITS");
-	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.JobSubmitter", 
+	// 		method = "writeNewSplits", 
+	// 		location = @Location(value = Kind.ENTRY))
+	// public static void onJobSubmitter_writeNewSplits_entry(AnyType input) {
+	// 	println("---TEST JOBSUBMITTER WRITENEWSPLITS");
+	// }
 
-	@OnMethod(clazz = "org.apache.hadoop.mapred.gridmix.JobSubmitter", 
-			method = "run", 
-			location = @Location(value = Kind.ENTRY))
-	public static void onJobSubmitter_entry() {
-		println("---TEST JOBSUBMITTER RUN");
-	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.gridmix.JobSubmitter", 
+	// 		method = "run", 
+	// 		location = @Location(value = Kind.ENTRY))
+	// public static void onJobSubmitter_entry() {
+	// 	println("---TEST JOBSUBMITTER RUN");
+	// }
 	
     /*************************************************************************/
 	/***************************** TASK COMMON *******************************/
@@ -97,6 +97,7 @@ public class HadoopBTrace {
 // 	 * **********************************************************/
 //	@TLS private static long uncompressStartTime = 0l;
 //	@TLS private static long compressStartTime = 0l;
+	//They will always be zero;
 	@TLS private static long uncompressDuration = 0l;
 	@TLS private static long compressDuration = 0l;
 
@@ -129,48 +130,49 @@ public class HadoopBTrace {
 // //	}
 
 	
-// 	/* ***********************************************************
-// 	 * HANDLE MERGING
-// 	 * **********************************************************/
+	/* ***********************************************************
+OK	 * HANDLE MERGING
+	 * **********************************************************/
 	@TLS private static long mergerWriteFileDuration = 0l;
 	@TLS private static int mergerWriteFileCount = 0;
 	
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.Merger", 
-// 			method = "writeFile",
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onMerger_writeFile_return(@Duration long duration) {
-// 		mergerWriteFileDuration += duration;
-// 		++mergerWriteFileCount;
-// 	}
+	// May not be executed, If this is only one file, we will execute sameVolRename and return (line 1807);
+	@OnMethod(clazz = "org.apache.hadoop.mapred.Merger", 
+			method = "writeFile",
+			location = @Location(value = Kind.RETURN))
+	public static void onMerger_writeFile_return(@Duration long duration) {
+		mergerWriteFileDuration += duration;
+		++mergerWriteFileCount;
+	}
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
-// 			method = "mergeParts", 
-// 			location = @Location(value = Kind.ENTRY))
-// 	public static void onMapOutputBuffer_mergeParts_entry() {
-// 		mergerWriteFileDuration = 0l;
-// 		mergerWriteFileCount = 0;
-// 	}
+	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
+			method = "mergeParts", 
+			location = @Location(value = Kind.ENTRY))
+	public static void onMapOutputBuffer_mergeParts_entry() {
+		mergerWriteFileDuration = 0l;
+		mergerWriteFileCount = 0;
+	}
 
 	
-// 	/* ***********************************************************
-// 	 * PERFORM COMBINER
-// 	 * **********************************************************/
+	/* ***********************************************************
+OK	 * PERFORM COMBINER
+	 * **********************************************************/
 	@TLS private static long combinerTotalDuration = 0l;
 	@TLS private static long combinerWriteDuration = 0l;
 	
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.Task$CombineOutputCollector", 
-// 			method = "collect", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onCombineOutputCollector_collect_return(@Duration long duration) {
-// 		combinerWriteDuration += duration;
-// 	}	
+	@OnMethod(clazz = "org.apache.hadoop.mapred.Task$CombineOutputCollector", 
+			method = "collect", 
+			location = @Location(value = Kind.RETURN))
+	public static void onCombineOutputCollector_collect_return(@Duration long duration) {
+		combinerWriteDuration += duration;
+	}	
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.Task$NewCombinerRunner", 
-// 			method = "combine", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onNewCombinerRunner_combine_return(@Duration long duration) {
-// 		combinerTotalDuration += duration;
-// 	}	
+	@OnMethod(clazz = "org.apache.hadoop.mapred.Task$NewCombinerRunner", 
+			method = "combine", 
+			location = @Location(value = Kind.RETURN))
+	public static void onNewCombinerRunner_combine_return(@Duration long duration) {
+		combinerTotalDuration += duration;
+	}	
 	
     
 	/*************************************************************************/
@@ -179,7 +181,7 @@ public class HadoopBTrace {
 
 	
 	/* ***********************************************************
-	 * PERFORM MAPPER SETUP
+OK	 * PERFORM MAPPER SETUP
 	 * **********************************************************/
 	@TLS private static long mapperSetupStartTime = 0l;
 
@@ -201,48 +203,75 @@ public class HadoopBTrace {
 
 	
 	/* ***********************************************************
-	 * READ MAP INPUT
+Tem	 * READ MAP INPUT
 	 * **********************************************************/
 	@TLS private static long mapInputDuration = 0l;
 
  
-	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
-	// 		method = "run", 
-	// 		location = @Location(value = Kind.ENTRY))
-	// public static void onMapper_run_Entry(Mapper<?,?,?,?>.Context context) {
-	// 	InputSplit split = context.getInputSplit();
-	// 	if (split instanceof FileSplit) {
-	// 		println("MAP\t" + ((FileSplit) split).getPath() + "\t0");
-	// 	} else {
-	// 		println("MAP\tNOT_FILE_SPLIT\t0");
-	// 	}
-	// }
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(value = Kind.ENTRY))
+	public static void onMapper_run_Entry(Mapper<?,?,?,?>.Context context) {
+		// InputSplit split = context.getInputSplit();
+		// if (split instanceof FileSplit) {
+		// 	// println("MAP\t" + ((FileSplit) split).getPath() + "\t0");
+		// 	println("MAP\t" + "LEGAL PATH" + "\t0");
+		// } else {
+		// 	println("MAP\tNOT_FILE_SPLIT\t0");
+		// }
+		println("MAP\tLEGAL PATH\t2");
+	}
      
 		
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.MapContext", 
-			method = "nextKeyValue", 
-			location = @Location(value = Kind.RETURN))
-	public static void onMapContext_nextKeyValue_return(@Duration long duration) {
-		mapInputDuration += duration;
-	}
 	
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.MapContext", 
-			method = "getCurrentKey", 
-			location = @Location(value = Kind.RETURN))
-	public static void onMapContext_getCurrentKey_return(@Duration long duration) {
-		mapInputDuration += duration;
+	@TLS private static long tempStartTime = 0l;
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(where = Where.BEFORE, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Mapper$Context", method = "nextKeyValue"))
+	public static void onMapper_run_Before_Call_nextKeyValue() {
+		tempStartTime = timeNanos();
 	}
 
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.MapContext", 
-			method = "getCurrentValue", 
-			location = @Location(value = Kind.RETURN))
-	public static void onMapContext_getCurrentValue_return(@Duration long duration) {
-		mapInputDuration += duration;
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(where = Where.AFTER, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Mapper$Context", method = "nextKeyValue"))
+	public static void onMapper_run_After_Call_nextKeyValue() {
+		mapInputDuration += timeNanos() - tempStartTime;
 	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(where = Where.BEFORE, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Mapper$Context", method = "getCurrentKey"))
+	public static void onMapper_run_Before_Call_getCurrentKey() {
+		tempStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(where = Where.AFTER, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Mapper$Context", method = "getCurrentKey"))
+	public static void onMapper_run_After_Call_getCurrentKey() {
+		mapInputDuration += timeNanos() - tempStartTime;
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(where = Where.BEFORE, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Mapper$Context", method = "getCurrentValue"))
+	public static void onMapper_run_Before_Call_getCurrentValue() {
+		tempStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
+			method = "run", 
+			location = @Location(where = Where.AFTER, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Mapper$Context", method = "getCurrentValue"))
+	public static void onMapper_run_After_Call_getCurrentValue() {
+		mapInputDuration += timeNanos() - tempStartTime;
+	}
+
 
 	
 	/* ***********************************************************
-	 * PERFORM MAP PROCESSING
+OK	 * PERFORM MAP PROCESSING
 	 * **********************************************************/
 	@TLS private static long mapProcessingDuration = 0l;
 	@TLS private static long mapProcessingStartTime = 0l;
@@ -261,12 +290,12 @@ public class HadoopBTrace {
 			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="map"))
          
 	public static void onMapper_run_After_Call_map(AnyType k, AnyType v, AnyType c) {
-		//TODO
-			// if (k != null)
-			// 	mapInputKByteCount += k.toString().getBytes("UTF-8").length;
-			// if (v != null)
-			// 	mapInputVByteCount += v.toString().getBytes("UTF-8").length;
-		
+		try {
+			if (k != null)
+				mapInputKByteCount += k.toString().getBytes("UTF-8").length;
+			if (v != null)
+				mapInputVByteCount += v.toString().getBytes("UTF-8").length;
+		}catch(Exception e) {}
 		
 		mapProcessingDuration += timeNanos() - mapProcessingStartTime;
 	}
@@ -274,14 +303,14 @@ public class HadoopBTrace {
 
 	
 	/* ***********************************************************
-	 * WRITE INTERMEDIATE MAP OUTPUT
+OK	 * WRITE INTERMEDIATE MAP OUTPUT
 	 * **********************************************************/
 	@TLS private static long mapCollectorWriteDuration = 0l;
 	@TLS private static long mapBufferCollectStartTime = 0l;
 	@TLS private static long mapBufferCollectDuration = 0l;
 	@TLS private static long mapPartitionStartTime = 0l;
 	@TLS private static long mapPartitionDuration = 0l;
-	
+
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewOutputCollector", 
 			method = "write", 
 			location = @Location(value = Kind.RETURN))
@@ -291,54 +320,61 @@ public class HadoopBTrace {
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewOutputCollector", 
 			method = "write", 
-			location = @Location(where=Where.BEFORE, value = Kind.CALL, clazz="/.*/", method="getPartition"))
+			location = @Location(where=Where.BEFORE, value = Kind.CALL, clazz="org.apache.hadoop.mapreduce.Partitioner", method="getPartition"))
 	public static void onNewOutputCollector_write_Before_Call_getPartition() {
 		mapPartitionStartTime = timeNanos();
 	}
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewOutputCollector", 
 			method = "write", 
-			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="getPartition"))
+			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="org.apache.hadoop.mapreduce.Partitioner", method="getPartition"))
 	public static void onNewOutputCollector_write_After_Call_getPartition() {
 		mapPartitionDuration += timeNanos() - mapPartitionStartTime;
 	}
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
 			method = "collect", 
-			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="unlock"))
+			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="checkSpillException"))
 	public static void onMapOutputBuffer_collect_after_await() {
+		mapBufferCollectStartTime = timeNanos();
+	}
+
+	// This spillLock.unlock() method may not be called, that's why we trace checkSpillException() method above;
+	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
+			method = "collect", 
+			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="java.util.concurrent.locks.ReentrantLock", method="unlock"))
+	public static void bonMapOutputBuffer_collect_after_await() {
 		mapBufferCollectStartTime = timeNanos();
 	}
 	
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
 			method = "collect", 
 			location = @Location(value = Kind.RETURN))
-	public static void onMapOutputBuffer_collect_return() {
+	public static void conMapOutputBuffer_collect_return() {
 		mapBufferCollectDuration += timeNanos() - mapBufferCollectStartTime;
 	}
 
 	
 	/* ***********************************************************
-	 * WRITE DIRECT MAP OUTPUT
+OK	 * WRITE DIRECT MAP OUTPUT
 	 * **********************************************************/
 	@TLS private static long mapDirectOutputDuration = 0l;
 	@TLS private static long mapOutputKByteCount = 0l;
 	@TLS private static long mapOutputVByteCount = 0l;
 
-        /*
+	// We execute NewOutputCollector above or NewDirectOutputCollector if reduceTasks == 0
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewDirectOutputCollector", 
 			method = "write", 
 			location = @Location(value = Kind.RETURN))
 	public static void onNewDirectOutputCollector_write_return(@Duration long duration, AnyType k, AnyType v) {
 		mapCollectorWriteDuration += duration;
-		//try {
+ 		try {
 			if (k != null)
 				mapOutputKByteCount += k.toString().getBytes("UTF-8").length;
 			if (v != null)
 				mapOutputVByteCount += v.toString().getBytes("UTF-8").length;
-		//} catch (Exception e) {}
+		} catch (Exception e) {}
 	}
-        */
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewDirectOutputCollector", 
 			method = "close", 
@@ -348,7 +384,7 @@ public class HadoopBTrace {
 	}
 	
 	/* ***********************************************************
-	 * PERFORM MAPPER CLEANUP
+OK	 * PERFORM MAPPER CLEANUP
 	 * **********************************************************/
 	@TLS private static long mapCleanupStartTime = 0l;
 
@@ -369,7 +405,7 @@ public class HadoopBTrace {
 
 	
 	/* ***********************************************************
-	 * PERFORM MAP SPILL
+OK	 * PERFORM MAP SPILL
 	 * **********************************************************/
 	@TLS private static long sortDuration = 0l;
 	@TLS private static int sortNumRecs = 0;
@@ -433,7 +469,7 @@ public class HadoopBTrace {
 
 	
 	/* ***********************************************************
-	 * PERFORM MERGE OF INTERMEDIATE OUTPUT
+OK	 * PERFORM MERGE OF INTERMEDIATE OUTPUT
 	 * **********************************************************/
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
@@ -452,7 +488,7 @@ public class HadoopBTrace {
 
 
 	/* ***********************************************************
-	 * DONE WITH MAPPER EXECUTION
+OK	 * DONE WITH MAPPER EXECUTION
 	 * **********************************************************/
 	@TLS private static boolean onMapper = false;
 
@@ -478,6 +514,7 @@ public class HadoopBTrace {
 		compressDuration = 0l;
 	}
 	
+	// If reduceTasks != 0, mapDirectOutputDuration,mapOutputKByteCount,mapOutputVByteCount = 0;
 	@OnMethod(clazz = "org.apache.hadoop.mapred.Task", 
 			method = "done", 
 			location = @Location(value = Kind.ENTRY))
@@ -490,7 +527,7 @@ public class HadoopBTrace {
 		}
 	}
 	
-//     /*************************************************************************/
+//  /*************************************************************************/
 // 	/******************************* REDUCER *********************************/
 // 	/*************************************************************************/
 	
