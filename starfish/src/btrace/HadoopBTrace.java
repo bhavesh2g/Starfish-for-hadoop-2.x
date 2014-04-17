@@ -159,7 +159,7 @@ OK	 * PERFORM COMBINER
 	 * **********************************************************/
 	@TLS private static long combinerTotalDuration = 0l;
 	@TLS private static long combinerWriteDuration = 0l;
-	
+	//Tem  add execution progressable.progress
 	@OnMethod(clazz = "org.apache.hadoop.mapred.Task$CombineOutputCollector", 
 			method = "collect", 
 			location = @Location(value = Kind.RETURN))
@@ -527,315 +527,478 @@ OK	 * DONE WITH MAPPER EXECUTION
 		}
 	}
 	
-//  /*************************************************************************/
-// 	/******************************* REDUCER *********************************/
-// 	/*************************************************************************/
+ /*************************************************************************/
+	/******************************* REDUCER *********************************/
+	/*************************************************************************/
 	
-	
-// 	/* ***********************************************************
-// 	 * SHUFFLE MAP OUTPUT TO REDUCER
-// 	 * **********************************************************/
-// 	@TLS private static boolean onReducer = false;
-// 	@TLS private static int toggleByteCount = 0;
-// 	@TLS private static String shuffleUncomprByteCount = "";
-// 	@TLS private static String shuffleComprByteCount = "";
+	// We can only model Shuffle phase that uses default ShuffleConsumerPlugin and AuxiliaryService
+	// that is org.apache.hadoop.task.reduce.Shuffle and org.apache.hadoop.mapred.ShuffleHandler
+	/* ***********************************************************
+My	 * SHUFFLE MAP OUTPUT TO REDUCER
+	 * **********************************************************/
+	@TLS private static boolean onReducer = false;
+	@TLS private static long shuffleUncomprByteCount = 0l;
+	@TLS private static long shuffleComprByteCount = 0l;
+	@TLS private static long copyDataDuration = 0l;
+	@TLS private static long tempCopyStartTime = 0l;
+	// @TLS private static long doMergeStartTime = 0l;
+	@TLS private static long doInMemMergeDuration = 0l;
+	@TLS private static long doOnDiskMergeDuration = 0l;
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier", 
-// 			method = "fetchOutputs", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onReduceCopier_fetchOutputs_return(@Duration long duration) {
-// 		onReducer = true;
-// 		uncompressDuration = 0l;
-// 		compressDuration = 0l;
-// 	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier", 
+	// 		method = "fetchOutputs", 
+	// 		location = @Location(value = Kind.RETURN))
+	// public static void onReduceCopier_fetchOutputs_return(@Duration long duration) {
+	// 	onReducer = true;
+	// 	uncompressDuration = 0l;
+	// 	compressDuration = 0l;
+	// }
+	// Only normal reduce task will execute initCodec
+	// this is how we distinguish normal reduce task to jobcleanup,setup,taskcleanup task
+	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
+			  method="run", 
+			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="initCodec"))
+	public static void onReducerTask_run_Before_Call_initCodec() {
+		onReducer = true;
+		uncompressDuration = 0l;
+		compressDuration = 0l;
+		mergerWriteFileCount = 0;
+		mergerWriteFileDuration = 0l;
+		combinerTotalDuration = 0l;
+		combinerWriteDuration = 0l;
+	}
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$MapOutputCopier", 
-// 			  method="getMapOutput", 
-// 			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="java.lang.Long", method="parseLong"))
-// 	public static void onReducerCopier_getMapOutput_Before_Call_parseLong(String s) {
-// 		if (toggleByteCount == 0)
-// 			shuffleUncomprByteCount = s;
-// 		else
-// 			shuffleComprByteCount = s;
-// 		toggleByteCount = 1 - toggleByteCount;
-// 	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$MapOutputCopier", 
+	// 		  method="getMapOutput", 
+	// 		  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="java.lang.Long", method="parseLong"))
+	// public static void onReducerCopier_getMapOutput_Before_Call_parseLong(String s) {
+	// 	if (toggleByteCount == 0)
+	// 		shuffleUncomprByteCount = s;
+	// 	else
+	// 		shuffleComprByteCount = s;
+	// 	toggleByteCount = 1 - toggleByteCount;
+	// }
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$MapOutputCopier", 
-// 			  method="getMapOutput", 
-// 			  location=@Location(value = Kind.RETURN))
-// 	public static void onReducerCopier_getMapOutput_return(@Duration long duration) {
-// 		String out = strcat("SHUFFLE\tUNCOMPRESS_BYTE_COUNT\t", shuffleUncomprByteCount);
-// 		out += strcat("\nSHUFFLE\tCOMPRESS_BYTE_COUNT\t", shuffleComprByteCount);
-// 		out += strcat("\nSHUFFLE\tCOPY_MAP_DATA\t", str(duration));
-// 		out += strcat("\nSHUFFLE\tUNCOMPRESS\t", str(uncompressDuration));
-// 		println(out);
+	//copyDataDuration is the time to copy data from other nodes to get MapOutput
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.Fetcher", 
+		  method="copyMapOutput", 
+		  location=@Location(value=Kind.ENTRY))
+	public static void onFetcher_copyMapOutput_entry() {
+		tempCopyStartTime = timeNanos();
+	}
+
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.Fetcher", 
+			  method="copyMapOutput", 
+			  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="shuffle"))
+	public static void onFetcher_copyMapOutput_After_Call_shuffle(AnyType a, AnyType b, long c, long d, AnyType e, AnyType f) {
+		// a = compressedLength, b = decompressedLength
+		shuffleUncomprByteCount += c;
+		shuffleComprByteCount += d;
+		copyDataDuration += timeNanos() - tempCopyStartTime;
+	}
+
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
+	// 		  method="getMapOutput", 
+	// 		  location=@Location(value = Kind.RETURN))
+	// public static void onReducerCopier_getMapOutput_return(@Duration long duration) {
+	// 	String out = strcat("SHUFFLE\tUNCOMPRESS_BYTE_COUNT\t", shuffleUncomprByteCount);
+	// 	out += strcat("\nSHUFFLE\tCOMPRESS_BYTE_COUNT\t", shuffleComprByteCount);
+	// 	out += strcat("\nSHUFFLE\tCOPY_MAP_DATA\t", str(duration));
+	// 	out += strcat("\nSHUFFLE\tUNCOMPRESS\t", str(uncompressDuration));
+	// 	println(out);
 		
-// 		uncompressDuration = 0l;
-// 	}
+	// 	uncompressDuration = 0l;
+	// }
+	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.Fetcher", 
+	// 		  method="run", 
+	// 		  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="copyFromHost"))
+	// public static void onFetcher_run_Before_Call_copyFromHost() {
+	// 	copyDataDuration = timeNanos();
+	// }
 
-// 	/* ***********************************************************
-// 	 * SORT/MERGE DURING SHUFFLING
-// 	 * **********************************************************/
-// 	@TLS private static long doInMemMergeDuration = 0l;
-// 	@TLS private static long doOnDiskMergeDuration = 0l;
-// 	@TLS private static long doOnDiskMergeStartTime = 0l;
+	//When we finish copyFromHost , output 
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.ShuffleSchedulerImpl", 
+			  method="freeHost", 
+			  location=@Location(value=Kind.ENTRY))
+	public static void onShuffleSchedulerImpl_freeHost_entry() throws Exception{
+		try {
+		String out = strcat("SHUFFLE\tUNCOMPRESS_BYTE_COUNT\t", str(shuffleUncomprByteCount));
+		out += strcat("\nSHUFFLE\tCOMPRESS_BYTE_COUNT\t", str(shuffleComprByteCount));
+		out += strcat("\nSHUFFLE\tCOPY_MAP_DATA\t", str(copyDataDuration));
+		out += strcat("\nSHUFFLE\tUNCOMPRESS\t", str(uncompressDuration));
+		println(out);
+		}
+		catch (Exception e) {
+			throw(e);
+		}
+		uncompressDuration = 0l;
+	}
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$InMemFSMergeThread", 
-// 			method = "doInMemMerge", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onInMemFSMergeThread_doInMemMerge_return(@Duration long duration) {
-// 		doInMemMergeDuration += duration;
-// 	}
+	/* ***********************************************************
+WA	 * SORT/MERGE DURING SHUFFLING
+	 * **********************************************************/
+
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$InMemFSMergeThread", 
+	// 		method = "doInMemMerge", 
+	// 		location = @Location(value = Kind.RETURN))
+	// public static void onInMemFSMergeThread_doInMemMerge_return(@Duration long duration) {
+	// 	doInMemMergeDuration += duration;
+	// }
 	
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$InMemFSMergeThread", 
-// 			method = "run", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onInMemFSMergeThread_run_return() {
-// 		if (doInMemMergeDuration != 0l) {
-// 			println(strcat("MERGE\tMERGE_IN_MEMORY\t", str(doInMemMergeDuration)));
-// 			println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
-// 			println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
-// 			println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
-// 			println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
-// 			println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
-// 			println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
-// 		}
-// 	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$InMemFSMergeThread", 
+	// 		method = "run", 
+	// 		location = @Location(value = Kind.RETURN))
+	// public static void onInMemFSMergeThread_run_return() {
+	// 	if (doInMemMergeDuration != 0l) {
+	// 		println(strcat("MERGE\tMERGE_IN_MEMORY\t", str(doInMemMergeDuration)));
+	// 		println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+	// 		println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+	// 		println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
+	// 		println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
+	// 		println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
+	// 		println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
+	// 	}
+	// }
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$LocalFSMerger", 
-// 			method = "run", 
-// 			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="getLocalPathForWrite"))
-// 	public static void onLocalFSMerger_run_Before_Merge() {
-// 		doOnDiskMergeStartTime = timeNanos();
-// 	}
+	// can not find class InMemoryMerger
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl$InMemoryMerger",
+			method = "merge",
+			location = @Location(value=Kind.RETURN))
+	public static void onInMemoryMerger_merge_return(@Duration long duration) {
+		doInMemMergeDuration += duration;
+	}
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$LocalFSMerger", 
-// 			method = "run", 
-// 			  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="addToMapOutputFilesOnDisk"))
-// 	public static void onLocalFSMerger_run_After_Merge() {
-// 		doOnDiskMergeDuration += timeNanos() - doOnDiskMergeStartTime;
-// 	}
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl$InMemoryMerger",
+			method = "close",
+			location = @Location(value=Kind.RETURN))
+	public static void onInMemoryMerger_close_return(){
+		// if (doInMemMergeDuration != 0l) {
+			println(strcat("MERGE\tMERGE_IN_MEMORY\t", str(doInMemMergeDuration)));
+			println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+			println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+			println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
+			println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
+			println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
+			println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
+		// }
+		mergerWriteFileDuration = 0l;
+		mergerWriteFileCount = 0;
+		combinerTotalDuration = 0l;
+		combinerWriteDuration = 0l;
+		uncompressDuration = 0l;
+		compressDuration = 0l;
+	}
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$LocalFSMerger", 
-// 			method = "run", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onLocalFSMerger_run_return() {
-// 		if (doOnDiskMergeDuration != 0l) {
-// 			println(strcat("MERGE\tMERGE_TO_DISK\t", str(doOnDiskMergeDuration)));
-// 			println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
-// 			println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
-// 			println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
-// 			println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
-// 			println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
-// 			println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
-// 		}
-// 	}
 
-	
-// 	/* ***********************************************************
-// 	 * SORT/MERGE MAP OUTPUT DATA
-// 	 * **********************************************************/
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$LocalFSMerger", 
+	// 		method = "run", 
+	// 		  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="getLocalPathForWrite"))
+	// public static void onLocalFSMerger_run_Before_Merge() {
+	// 	doOnDiskMergeStartTime = timeNanos();
+	// }
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier", 
-// 			method = "createKVIterator", 
-// 			location = @Location(value = Kind.ENTRY))
-// 	public static void onReduceCopier_createKVIterator_entry() {
-// 		if (onReducer) {
-// 			mergerWriteFileCount = 0;
-// 			mergerWriteFileDuration = 0;
-// 		}
-// 	}
-	
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier", 
-// 			method = "createKVIterator", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onReduceCopier_createKVIterator_return(@Duration long duration) {
-// 		if (onReducer) {
-// 			println(strcat("SORT\tMERGE_MAP_DATA\t", str(duration)));
-// 			println(strcat("SORT\tREAD_WRITE\t", str(mergerWriteFileDuration)));
-// 			println(strcat("SORT\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
-// 			println(strcat("SORT\tUNCOMPRESS\t", str(uncompressDuration)));
-// 			println(strcat("SORT\tCOMPRESS\t", str(compressDuration)));
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$LocalFSMerger", 
+	// 		method = "run", 
+	// 		  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="addToMapOutputFilesOnDisk"))
+	// public static void onLocalFSMerger_run_After_Merge() {
+	// 	doOnDiskMergeDuration += timeNanos() - doOnDiskMergeStartTime;
+	// }
 
-// 			uncompressDuration = 0l;
-// 			compressDuration = 0l;
-// 		}
-// 	}
-	
-	
-// 	/* ***********************************************************
-// 	 * PERFORM REDUCER SETUP
-// 	 * **********************************************************/
-// 	@TLS private static long reducerSetupStartTime = 0l;
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier$LocalFSMerger", 
+	// 		method = "run", 
+	// 		location = @Location(value = Kind.RETURN))
+	// public static void onLocalFSMerger_run_return() {
+	// 	if (doOnDiskMergeDuration != 0l) {
+	// 		println(strcat("MERGE\tMERGE_TO_DISK\t", str(doOnDiskMergeDuration)));
+	// 		println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+	// 		println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+	// 		println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
+	// 		println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
+	// 		println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
+	// 		println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
+	// 	}
+	// }
 
-// 	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
-// 			  method="run", 
-// 			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="setup"))
-// 	public static void onReducer_run_Before_Call_setup() {
-// 		if (onReducer) {
-// 			reducerSetupStartTime = timeNanos();
-// 			println(strcat("REDUCE\tSTARTUP_MEM\t", str(used(heapUsage()))));
-// 		}
-// 	}
+	// can't trace yet, In debug output, btrace indeed instruments OnDiskMerger, but never trace any of its methods;
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl$OnDiskMerger", 
+				method = "merge", 
+				  location=@Location(value=Kind.RETURN))
+	public static void onOnDiskMerger_merge_return(@Duration long duration) {
+		doOnDiskMergeDuration += duration;
+	}
 
-// 	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
-// 			  method="run", 
-// 			  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="setup"))
-// 	public static void onReducer_run_After_Call_setup() {
-// 		if (onReducer) {
-// 			println(strcat("REDUCE\tSETUP\t", 
-// 					str(timeNanos() - reducerSetupStartTime)));
-// 			println(strcat("REDUCE\tSETUP_MEM\t", str(used(heapUsage()))));
-// 		}
-// 	}
-	
-	
-// 	/* ***********************************************************
-// 	 * READ REDUCER INPUT
-// 	 * **********************************************************/
-// 	@TLS private static long reduceInputDuration = 0l;
-
-// 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.ReduceContext", 
-// 			method = "nextKey", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onReduceContext_nextKey_return(@Duration long duration) {
-// 		if (onReducer)
-// 			reduceInputDuration += duration;
-// 	}
-	
-// 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.ReduceContext", 
-// 			method = "getCurrentKey", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onReduceContext_getCurrentKey_return(@Duration long duration) {
-// 		if (onReducer)
-// 			reduceInputDuration += duration;
-// 	}
-
-// 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.ReduceContext", 
-// 			method = "getValues", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onReduceContext_getValues_return(@Duration long duration) {
-// 		if (onReducer)
-// 			reduceInputDuration += duration;
-// 	}
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl$OnDiskMerger",
+				method = "close",
+				location = @Location(value=Kind.RETURN))
+	public static void onOnDiskMerger_close_return(){
+		// if (doOnDiskMergeDuration != 0l) {
+			println(strcat("MERGE\tMERGE_TO_DISK\t", str(doOnDiskMergeDuration)));
+			println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+			println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+			println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
+			println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
+			println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
+			println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
+		// }
+		mergerWriteFileDuration = 0l;
+		mergerWriteFileCount = 0;
+		combinerTotalDuration = 0l;
+		combinerWriteDuration = 0l;
+		uncompressDuration = 0l;
+		compressDuration = 0l;
+	}
 
 	
-// 	/* ***********************************************************
-// 	 * PERFORM REDUCE PROCESSING
-// 	 * **********************************************************/
-// 	@TLS private static long reduceProcessingDuration = 0l;
-// 	@TLS private static long reduceProcessingStartTime = 0l;
+	/* ***********************************************************
+OK	 * SORT/MERGE MAP OUTPUT DATA
+	 * **********************************************************/
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
-// 			method = "run", 
-// 			location = @Location(where=Where.BEFORE, value = Kind.CALL, clazz="/.*/", method="reduce"))
-// 	public static void onReducer_run_Before_Call_reduce() {
-// 		if (onReducer)
-// 			reduceProcessingStartTime = timeNanos();
-// 	}
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier", 
+	// 		method = "createKVIterator", 
+	// 		location = @Location(value = Kind.ENTRY))
+	// public static void onReduceCopier_createKVIterator_entry() {
+	// 	if (onReducer) {
+	// 		mergerWriteFileCount = 0;
+	// 		mergerWriteFileDuration = 0;
+	// 	}
+	// }
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
-// 			method = "run", 
-// 			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="reduce"))
-// 	public static void onReducer_run_After_Call_reduce() {
-// 		if (onReducer)
-// 			reduceProcessingDuration += timeNanos() - reduceProcessingStartTime;
-// 	}
+ 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl", 
+			method = "finalMerge", 
+			location = @Location(value = Kind.ENTRY))
+	public static void onMergeManagerImpl_finalMerge_entry() {
+		if (onReducer) {
+			mergerWriteFileCount = 0;
+			mergerWriteFileDuration = 0l;
+		}
+	}
+	
+	// @OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$ReduceCopier", 
+	// 		method = "createKVIterator", 
+	// 		location = @Location(value = Kind.RETURN))
+	// public static void onReduceCopier_createKVIterator_return(@Duration long duration) {
+	// 	if (onReducer) {
+	// 		println(strcat("SORT\tMERGE_MAP_DATA\t", str(duration)));
+	// 		println(strcat("SORT\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+	// 		println(strcat("SORT\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+	// 		println(strcat("SORT\tUNCOMPRESS\t", str(uncompressDuration)));
+	// 		println(strcat("SORT\tCOMPRESS\t", str(compressDuration)));
+
+	// 		uncompressDuration = 0l;
+	// 		compressDuration = 0l;
+	// 	}
+	// }
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl", 
+				method = "finalMerge", 
+				location = @Location(value = Kind.RETURN))
+	public static void onMergeManagerImpl_finalMerge_return(@Duration long duration) {
+		if (onReducer) {
+			println(strcat("SORT\tMERGE_MAP_DATA\t", str(duration)));
+			println(strcat("SORT\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+			println(strcat("SORT\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+			println(strcat("SORT\tUNCOMPRESS\t", str(uncompressDuration)));
+			println(strcat("SORT\tCOMPRESS\t", str(compressDuration)));
+
+			mergerWriteFileDuration = 0l;
+			mergerWriteFileCount = 0;
+			uncompressDuration = 0l;
+			compressDuration = 0l;
+		}
+	}
+	
+	
+	/* ***********************************************************
+OK	 * PERFORM REDUCER SETUP
+	 * **********************************************************/
+	@TLS private static long reducerSetupStartTime = 0l;
+
+	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
+			  method="run", 
+			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="setup"))
+	public static void onReducer_run_Before_Call_setup() {
+		if (onReducer) {
+			reducerSetupStartTime = timeNanos();
+			println(strcat("REDUCE\tSTARTUP_MEM\t", str(used(heapUsage()))));
+		}
+	}
+
+	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
+			  method="run", 
+			  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="setup"))
+	public static void onReducer_run_After_Call_setup() {
+		if (onReducer) {
+			println(strcat("REDUCE\tSETUP\t", 
+					str(timeNanos() - reducerSetupStartTime)));
+			println(strcat("REDUCE\tSETUP_MEM\t", str(used(heapUsage()))));
+		}
+	}
+	
+	
+	/* ***********************************************************
+OK	 * READ REDUCER INPUT
+	 * **********************************************************/
+	@TLS private static long reduceInputStartTime = 0l;
+	@TLS private static long reduceInputDuration = 0l;
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where = Where.BEFORE, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Reducer$Context", method = "nextKey"))
+	public static void onReducer_run_Before_Call_nextKeyValue() {
+		reduceInputStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where = Where.AFTER, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Reducer$Context", method = "nextKey"))
+	public static void onReducer_run_After_Call_nextKeyValue() {
+		reduceInputDuration += timeNanos() - reduceInputStartTime;
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where = Where.BEFORE, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Reducer$Context", method = "getCurrentKey"))
+	public static void onReducer_run_Before_Call_getCurrentKey() {
+		reduceInputStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where = Where.AFTER, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Reducer$Context", method = "getCurrentKey"))
+	public static void onReducer_run_After_Call_getCurrentKey() {
+		reduceInputDuration += timeNanos() - reduceInputStartTime;
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where = Where.BEFORE, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Reducer$Context", method = "getValues"))
+	public static void onReducer_run_Before_Call_getValues() {
+		reduceInputStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where = Where.AFTER, value = Kind.CALL, clazz = "org.apache.hadoop.mapreduce.Reducer$Context", method = "getValues"))
+	public static void onReducer_run_After_Call_getValues() {
+		reduceInputDuration += timeNanos() - reduceInputStartTime;
+	}
 
 	
-// 	/* ***********************************************************
-// 	 * WRITE REDUCER OUTPUT
-// 	 * **********************************************************/
-// 	@TLS private static long reduceWriteDuration = 0l;
-// 	@TLS private static long reduceWriterCloseStartTime = 0l;
-// 	@TLS private static long reduceWriteKByteCount = 0l;
-// 	@TLS private static long reduceWriteVByteCount = 0l;
-	
-//         /*
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$NewTrackingRecordWriter", 
-// 			method = "write", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onNewTrackingRecordWriter_write_return(@Duration long duration, AnyType k, AnyType v) {
-// 		if (onReducer) {
-// 			reduceWriteDuration += duration;
-// 			//try {
-// 				if (k != null)
-// 					reduceWriteKByteCount += k.toString().getBytes("UTF-8").length;
-// 				if (v != null)
-// 					reduceWriteVByteCount += v.toString().getBytes("UTF-8").length;
-// 			//} catch (Exception e) {}
-// 		}
-// 	}
-//         */
+	/* ***********************************************************
+OK	 * PERFORM REDUCE PROCESSING
+	 * **********************************************************/
+	@TLS private static long reduceProcessingDuration = 0l;
+	@TLS private static long reduceProcessingStartTime = 0l;
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
-// 			method = "runNewReducer", 
-// 			location = @Location(where=Where.BEFORE, value = Kind.CALL, clazz="/.*/", method="close"))
-// 	public static void onReduceTask_runNewReducer_Before_Call_close() {
-// 		if (onReducer)
-// 			reduceWriterCloseStartTime = timeNanos();
-// 	}
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where=Where.BEFORE, value = Kind.CALL, clazz="/.*/", method="reduce"))
+	public static void onReducer_run_Before_Call_reduce() {
+		if (onReducer)
+			reduceProcessingStartTime = timeNanos();
+	}
 
-// 	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
-// 			method = "runNewReducer", 
-// 			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="close"))
-// 	public static void onReduceTask_runNewReducer_After_Call_close() {
-// 		if (onReducer) {
-// 			println(strcat("REDUCE\tWRITE\t", str(timeNanos() - reduceWriterCloseStartTime)));
-// 			println(strcat("REDUCE\tCOMPRESS\t", str(compressDuration)));
-// 			compressDuration = 0l;
-// 		}
-// 	}
-
-
-// 	/* ***********************************************************
-// 	 * PERFORM REDUCER CLEANUP
-// 	 * **********************************************************/
-// 	@TLS private static long reducerCleanupStartTime = 0l;
-
-// 	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
-// 			  method="run", 
-// 			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="cleanup"))
-// 	public static void onReducer_run_Before_Call_cleanup() {
-// 		if (onReducer)
-// 			reducerCleanupStartTime = timeNanos();
-// 	}
-
-// 	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
-// 			  method="run", 
-// 			  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="cleanup"))
-// 	public static void onReducer_run_After_Call_cleanup() {
-// 		if (onReducer) {
-// 			println(strcat("REDUCE\tCLEANUP\t", str(timeNanos() - reducerCleanupStartTime)));
-// 			println(strcat("REDUCE\tCLEANUP_MEM\t", str(used(heapUsage()))));
-// 		}
-// 	}
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="reduce"))
+	public static void onReducer_run_After_Call_reduce() {
+		if (onReducer)
+			reduceProcessingDuration += timeNanos() - reduceProcessingStartTime;
+	}
 
 	
-// 	/* ***********************************************************
-// 	 * DONE WITH REDUCER EXECUTION
-// 	 * **********************************************************/
+	/* ***********************************************************
+OK	 * WRITE REDUCER OUTPUT
+	 * **********************************************************/
+	@TLS private static long reduceWriteDuration = 0l;
+	@TLS private static long reduceWriterCloseStartTime = 0l;
+	@TLS private static long reduceWriteKByteCount = 0l;
+	@TLS private static long reduceWriteVByteCount = 0l;
 	
-// 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
-// 			method = "run", 
-// 			location = @Location(value = Kind.RETURN))
-// 	public static void onReducer_run_return(@Duration long duration) {
-// 		// Print out the reducer statistics
-// 		if (onReducer) {
-// 			println(strcat("REDUCE\tTOTAL_RUN\t", str(duration)));
-// 			println(strcat("REDUCE\tREAD\t", str(reduceInputDuration)));
-// 			println(strcat("REDUCE\tUNCOMPRESS\t", str(uncompressDuration)));
-// 			println(strcat("REDUCE\tREDUCE\t", str(reduceProcessingDuration)));
-// 			println(strcat("REDUCE\tWRITE\t", str(reduceWriteDuration)));
-// 			println(strcat("REDUCE\tCOMPRESS\t", str(compressDuration)));
-// 			println(strcat("REDUCE\tKEY_BYTE_COUNT\t", str(reduceWriteKByteCount)));
-// 			println(strcat("REDUCE\tVALUE_BYTE_COUNT\t", str(reduceWriteVByteCount)));
-// 			println(strcat("REDUCE\tREDUCE_MEM\t", str(used(heapUsage()))));
+     
+	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask$NewTrackingRecordWriter", 
+			method = "write", 
+			location = @Location(value = Kind.RETURN))
+	public static void onNewTrackingRecordWriter_write_return(@Duration long duration, AnyType k, AnyType v) {
+		if (onReducer) {
+			reduceWriteDuration += duration;
+			try {
+				if (k != null)
+					reduceWriteKByteCount += k.toString().getBytes("UTF-8").length;
+				if (v != null)
+					reduceWriteVByteCount += v.toString().getBytes("UTF-8").length;
+			} catch (Exception e) {}
+		}
+	}
 
-// 			uncompressDuration = 0l;
-// 			compressDuration = 0l;
-// 		}
-// 	}
+	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
+			method = "runNewReducer", 
+			location = @Location(where=Where.BEFORE, value = Kind.CALL, clazz="/.*/", method="close"))
+	public static void onReduceTask_runNewReducer_Before_Call_close() {
+		if (onReducer)
+			reduceWriterCloseStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapred.ReduceTask", 
+			method = "runNewReducer", 
+			location = @Location(where=Where.AFTER, value = Kind.CALL, clazz="/.*/", method="close"))
+	public static void onReduceTask_runNewReducer_After_Call_close() {
+		if (onReducer) {
+			println(strcat("REDUCE\tWRITE\t", str(timeNanos() - reduceWriterCloseStartTime)));
+			println(strcat("REDUCE\tCOMPRESS\t", str(compressDuration)));
+			compressDuration = 0l;
+		}
+	}
+
+
+	/* ***********************************************************
+OK	 * PERFORM REDUCER CLEANUP
+	 * **********************************************************/
+	@TLS private static long reducerCleanupStartTime = 0l;
+
+	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
+			  method="run", 
+			  location=@Location(where=Where.BEFORE, value=Kind.CALL, clazz="/.*/", method="cleanup"))
+	public static void onReducer_run_Before_Call_cleanup() {
+		if (onReducer)
+			reducerCleanupStartTime = timeNanos();
+	}
+
+	@OnMethod(clazz="org.apache.hadoop.mapreduce.Reducer", 
+			  method="run", 
+			  location=@Location(where=Where.AFTER, value=Kind.CALL, clazz="/.*/", method="cleanup"))
+	public static void onReducer_run_After_Call_cleanup() {
+		if (onReducer) {
+			println(strcat("REDUCE\tCLEANUP\t", str(timeNanos() - reducerCleanupStartTime)));
+			println(strcat("REDUCE\tCLEANUP_MEM\t", str(used(heapUsage()))));
+		}
+	}
+
+	
+	/* ***********************************************************
+OK	 * DONE WITH REDUCER EXECUTION
+	 * **********************************************************/
+	
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Reducer", 
+			method = "run", 
+			location = @Location(value = Kind.RETURN))
+	public static void onReducer_run_return(@Duration long duration) {
+		// Print out the reducer statistics
+		if (onReducer) {
+			println(strcat("REDUCE\tTOTAL_RUN\t", str(duration)));
+			println(strcat("REDUCE\tREAD\t", str(reduceInputDuration)));
+			println(strcat("REDUCE\tUNCOMPRESS\t", str(uncompressDuration)));
+			println(strcat("REDUCE\tREDUCE\t", str(reduceProcessingDuration)));
+			println(strcat("REDUCE\tWRITE\t", str(reduceWriteDuration)));
+			println(strcat("REDUCE\tCOMPRESS\t", str(compressDuration)));
+			println(strcat("REDUCE\tKEY_BYTE_COUNT\t", str(reduceWriteKByteCount)));
+			println(strcat("REDUCE\tVALUE_BYTE_COUNT\t", str(reduceWriteVByteCount)));
+			println(strcat("REDUCE\tREDUCE_MEM\t", str(used(heapUsage()))));
+
+			uncompressDuration = 0l;
+			compressDuration = 0l;
+		}
+	}
 
 }
 
