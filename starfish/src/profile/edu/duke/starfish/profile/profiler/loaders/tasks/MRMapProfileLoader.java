@@ -101,7 +101,7 @@ public class MRMapProfileLoader extends MRTaskProfileLoader {
 	 */
 
 	@Override
-	protected boolean loadExecutionProfile() throws ProfileFormatException {
+	public boolean loadExecutionProfile() throws ProfileFormatException {
 		// Get and validate the profile records
 		if (!getAndValidateProfileRecords())
 			return false;

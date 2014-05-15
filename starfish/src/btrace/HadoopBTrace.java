@@ -10,14 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.sun.btrace.AnyType;
-import com.sun.btrace.annotations.BTrace;
-import com.sun.btrace.annotations.Duration;
-import com.sun.btrace.annotations.Kind;
-import com.sun.btrace.annotations.Location;
-import com.sun.btrace.annotations.OnMethod;
-import com.sun.btrace.annotations.Return;
-import com.sun.btrace.annotations.TLS;
-import com.sun.btrace.annotations.Where;
+import com.sun.btrace.annotations.*;
 
 /**
  * Profile the execution of a Map-Reduce job on a hadoop cluster.
@@ -40,13 +33,6 @@ public class HadoopBTrace {
 	/*************************************************************************/
 	/***************************** TEST        *******************************/
 	/*************************************************************************/
-
-	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
-	// 		method = "run", 
-	// 		location = @Location(value = Kind.ENTRY))
-	// public static void onJobClient_submitJobInternal_entry() {
-	// 	println("---TEST MAPPER RUN");
-	// }
 
 	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
 	// 		method = "map", 
@@ -618,22 +604,39 @@ My	 * SHUFFLE MAP OUTPUT TO REDUCER
 	// }
 
 	//When we finish copyFromHost , output 
-	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.ShuffleSchedulerImpl", 
-			  method="freeHost", 
-			  location=@Location(value=Kind.ENTRY))
-	public static void onShuffleSchedulerImpl_freeHost_entry() throws Exception{
-		try {
-		String out = strcat("SHUFFLE\tUNCOMPRESS_BYTE_COUNT\t", str(shuffleUncomprByteCount));
-		out += strcat("\nSHUFFLE\tCOMPRESS_BYTE_COUNT\t", str(shuffleComprByteCount));
-		out += strcat("\nSHUFFLE\tCOPY_MAP_DATA\t", str(copyDataDuration));
-		out += strcat("\nSHUFFLE\tUNCOMPRESS\t", str(uncompressDuration));
-		println(out);
-		}
-		catch (Exception e) {
-			throw(e);
-		}
+	// @OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.ShuffleSchedulerImpl", 
+	// 		  method="freeHost", 
+	// 		  location=@Location(value=Kind.ENTRY))
+	// public static void onShuffleSchedulerImpl_freeHost_entry() throws InterruptedException{
+	// 	try {
+	// 	String out = strcat("SHUFFLE\tUNCOMPRESS_BYTE_COUNT\t", str(shuffleUncomprByteCount));
+	// 	out += strcat("\nSHUFFLE\tCOMPRESS_BYTE_COUNT\t", str(shuffleComprByteCount));
+	// 	out += strcat("\nSHUFFLE\tCOPY_MAP_DATA\t", str(copyDataDuration));
+	// 	out += strcat("\nSHUFFLE\tUNCOMPRESS\t", str(uncompressDuration));
+	// 	println(out);
+	// 	}
+	// 	catch (InterruptedException e) {
+	// 		throw(e);
+	// 	}
+	// 	uncompressDuration = 0l;
+	// }
+	@OnMethod(clazz = "org.apache.hadoop.mapreduce.task.reduce.Fetcher", 
+			  method="run", 
+			  location=@Location(value=Kind.CALL, where=Where.AFTER, clazz="/.*/", method="copyFromHost"))
+	public static void onShuffleSchedulerImpl_freeHost_entry(){
+		// try {
+			String out = strcat("SHUFFLE\tUNCOMPRESS_BYTE_COUNT\t", str(shuffleUncomprByteCount));
+			out += strcat("\nSHUFFLE\tCOMPRESS_BYTE_COUNT\t", str(shuffleComprByteCount));
+			out += strcat("\nSHUFFLE\tCOPY_MAP_DATA\t", str(copyDataDuration));
+			out += strcat("\nSHUFFLE\tUNCOMPRESS\t", str(uncompressDuration));
+			println(out);
+		// }
+		// catch (InterruptedException e) {
+			// return;
+		// }
 		uncompressDuration = 0l;
 	}
+
 
 	/* ***********************************************************
 WA	 * SORT/MERGE DURING SHUFFLING
