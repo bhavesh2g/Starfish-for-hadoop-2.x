@@ -1,0 +1,142 @@
+2014-05-20 14:42:11,376 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.retry.interval;  Ignoring.
+2014-05-20 14:42:11,388 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.attempts;  Ignoring.
+2014-05-20 14:42:11,653 INFO [main] org.apache.hadoop.metrics2.impl.MetricsConfig: loaded properties from hadoop-metrics2.properties
+2014-05-20 14:42:11,738 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: Scheduled snapshot period at 10 second(s).
+2014-05-20 14:42:11,738 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: MapTask metrics system started
+2014-05-20 14:42:11,752 INFO [main] org.apache.hadoop.mapred.YarnChild: Executing with tokens:
+2014-05-20 14:42:11,753 INFO [main] org.apache.hadoop.mapred.YarnChild: Kind: mapreduce.job, Service: job_1397147117653_0181, Ident: (org.apache.hadoop.mapreduce.security.token.JobTokenIdentifier@4888b7ec)
+2014-05-20 14:42:11,865 INFO [main] org.apache.hadoop.mapred.YarnChild: Sleeping for 0ms before retrying again. Got null now.
+2014-05-20 14:42:12,802 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.retry.interval;  Ignoring.
+2014-05-20 14:42:12,804 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.attempts;  Ignoring.
+2014-05-20 14:42:12,963 INFO [main] org.apache.hadoop.mapred.YarnChild: mapreduce.cluster.local.dir for child: /home/hadoop/temp/nm-local-dir/usercache/hadoop/appcache/application_1397147117653_0181
+2014-05-20 14:42:13,184 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.retry.interval;  Ignoring.
+2014-05-20 14:42:13,185 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.attempts;  Ignoring.
+2014-05-20 14:42:13,335 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.task.id is deprecated. Instead, use mapreduce.task.attempt.id
+2014-05-20 14:42:13,336 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.task.is.map is deprecated. Instead, use mapreduce.task.ismap
+2014-05-20 14:42:13,336 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.tip.id is deprecated. Instead, use mapreduce.task.id
+2014-05-20 14:42:13,337 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.task.partition is deprecated. Instead, use mapreduce.task.partition
+2014-05-20 14:42:13,338 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.local.dir is deprecated. Instead, use mapreduce.cluster.local.dir
+2014-05-20 14:42:13,339 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: job.local.dir is deprecated. Instead, use mapreduce.job.local.dir
+2014-05-20 14:42:13,339 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.cache.localFiles is deprecated. Instead, use mapreduce.job.cache.local.files
+2014-05-20 14:42:13,339 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.job.id is deprecated. Instead, use mapreduce.job.id
+2014-05-20 14:42:13,649 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: session.id is deprecated. Instead, use dfs.metrics.session-id
+2014-05-20 14:42:14,178 INFO [main] org.apache.hadoop.mapred.Task:  Using ResourceCalculatorProcessTree : [ ]
+2014-05-20 14:42:14,535 INFO [main] org.apache.hadoop.mapred.MapTask: Processing split: hdfs://sandking00:9000/tmp/HiBench/Terasort/Input/part-m-00009:939524096+102142604
+2014-05-20 14:42:14,586 INFO [main] org.apache.hadoop.mapred.MapTask: Map output collector class = org.apache.hadoop.mapred.MapTask$MapOutputBuffer
+2014-05-20 14:42:14,665 INFO [main] org.apache.hadoop.mapred.MapTask: (EQUATOR) 0 kvi 26214396(104857584)
+2014-05-20 14:42:14,665 INFO [main] org.apache.hadoop.mapred.MapTask: mapreduce.task.io.sort.mb: 100
+2014-05-20 14:42:14,665 INFO [main] org.apache.hadoop.mapred.MapTask: soft limit at 83886080
+2014-05-20 14:42:14,665 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 0; bufvoid = 104857600
+2014-05-20 14:42:14,666 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 26214396; length = 6553600
+2014-05-20 14:42:19,093 INFO [main] org.apache.hadoop.mapred.MapTask: Spilling map output
+2014-05-20 14:42:19,093 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 0; bufend = 72511698; bufvoid = 104857600
+2014-05-20 14:42:19,093 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 26214396(104857584); kvend = 23370804(93483216); length = 2843593/6553600
+2014-05-20 14:42:19,093 INFO [main] org.apache.hadoop.mapred.MapTask: (EQUATOR) 75355282 kvi 18838816(75355264)
+2014-05-20 14:42:21,903 INFO [SpillThread] org.apache.hadoop.mapred.MapTask: Finished spill 0
+2014-05-20 14:42:21,903 INFO [main] org.apache.hadoop.mapred.MapTask: (RESET) equator 75355282 kv 18838816(75355264) kvi 18127932(72511728)
+2014-05-20 14:42:22,988 INFO [main] org.apache.hadoop.mapred.MapTask: Starting flush of map output
+2014-05-20 14:42:22,988 INFO [main] org.apache.hadoop.mapred.MapTask: Spilling map output
+2014-05-20 14:42:22,988 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 75355282; bufend = 2171436; bufvoid = 104857600
+2014-05-20 14:42:22,988 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 18838816(75355264); kvend = 17596712(70386848); length = 1242105/6553600
+2014-05-20 14:42:23,771 INFO [main] org.apache.hadoop.mapred.MapTask: Finished spill 1
+2014-05-20 14:42:23,783 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:23,789 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2155698 bytes
+2014-05-20 14:42:23,981 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:23,983 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2228394 bytes
+2014-05-20 14:42:24,028 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,029 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2235882 bytes
+2014-05-20 14:42:24,083 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,083 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2220282 bytes
+2014-05-20 14:42:24,108 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,109 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2287362 bytes
+2014-05-20 14:42:24,135 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,136 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2214458 bytes
+2014-05-20 14:42:24,161 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,162 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2158922 bytes
+2014-05-20 14:42:24,191 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,192 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2173482 bytes
+2014-05-20 14:42:24,216 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,217 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2175770 bytes
+2014-05-20 14:42:24,241 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,242 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2315338 bytes
+2014-05-20 14:42:24,268 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,269 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2272698 bytes
+2014-05-20 14:42:24,294 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,295 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2190434 bytes
+2014-05-20 14:42:24,319 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,320 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2226106 bytes
+2014-05-20 14:42:24,357 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,358 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2223402 bytes
+2014-05-20 14:42:24,400 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,418 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2164122 bytes
+2014-05-20 14:42:24,459 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,461 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2157778 bytes
+2014-05-20 14:42:24,502 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,503 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2155490 bytes
+2014-05-20 14:42:24,544 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,545 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2209882 bytes
+2014-05-20 14:42:24,587 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,588 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2221010 bytes
+2014-05-20 14:42:24,629 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,630 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2234114 bytes
+2014-05-20 14:42:24,672 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,673 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2264482 bytes
+2014-05-20 14:42:24,701 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,701 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2246386 bytes
+2014-05-20 14:42:24,737 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,738 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2146754 bytes
+2014-05-20 14:42:24,762 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,763 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2229538 bytes
+2014-05-20 14:42:24,788 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,789 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2232034 bytes
+2014-05-20 14:42:24,818 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,818 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2213522 bytes
+2014-05-20 14:42:24,846 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,846 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2090282 bytes
+2014-05-20 14:42:24,869 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,870 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2252834 bytes
+2014-05-20 14:42:24,894 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,895 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2313362 bytes
+2014-05-20 14:42:24,919 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,920 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2197922 bytes
+2014-05-20 14:42:24,953 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,953 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2259802 bytes
+2014-05-20 14:42:24,977 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:24,978 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2159962 bytes
+2014-05-20 14:42:25,001 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,001 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2256474 bytes
+2014-05-20 14:42:25,025 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,026 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2147066 bytes
+2014-05-20 14:42:25,048 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,049 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2251274 bytes
+2014-05-20 14:42:25,073 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,074 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2176914 bytes
+2014-05-20 14:42:25,097 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,098 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2204474 bytes
+2014-05-20 14:42:25,126 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,127 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2176810 bytes
+2014-05-20 14:42:25,151 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,151 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2181594 bytes
+2014-05-20 14:42:25,176 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:25,964 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2239314 bytes
+2014-05-20 14:42:26,000 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,001 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2147898 bytes
+2014-05-20 14:42:26,045 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,046 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2276546 bytes
+2014-05-20 14:42:26,087 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,088 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2179306 bytes
+2014-05-20 14:42:26,134 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,135 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2204890 bytes
+2014-05-20 14:42:26,172 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,173 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2273426 bytes
+2014-05-20 14:42:26,207 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,208 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2199794 bytes
+2014-05-20 14:42:26,230 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,231 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2206034 bytes
+2014-05-20 14:42:26,254 INFO [main] org.apache.hadoop.mapred.Merger: Merging 2 sorted segments
+2014-05-20 14:42:26,254 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 2 segments left of total size: 2278314 bytes
+2014-05-20 14:42:26,304 INFO [main] org.apache.hadoop.mapred.Task: Task:attempt_1397147117653_0181_m_000729_0 is done. And is in the process of committing
+2014-05-20 14:42:26,417 INFO [main] org.apache.hadoop.mapred.Task: Task 'attempt_1397147117653_0181_m_000729_0' done.
+2014-05-20 14:42:26,518 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: Stopping MapTask metrics system...
+2014-05-20 14:42:26,519 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: MapTask metrics system stopped.
+2014-05-20 14:42:26,519 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: MapTask metrics system shutdown complete.

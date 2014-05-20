@@ -1,0 +1,159 @@
+JAVA PROFILE 1.0.1, created Mon May 19 22:45:12 2014
+
+Copyright (c) 2003, 2005, Oracle and/or its affiliates. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+  - Neither the name of Oracle nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Header for -agentlib:hprof (or -Xrunhprof) ASCII Output (JDK 5.0 JVMTI based)
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME        is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+                the time spent by a thread waiting to enter a monitor.
+                Entries in this record are TRACEs ranked by the percentage
+                of total monitor contention time and a brief description
+                of the monitor.  The "count" field indicates the number of 
+                times the monitor was contended at that TRACE.
+
+MONITOR DUMP    is a complete snapshot of all the monitors and threads in 
+                the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=500002bc, id = 200002, name="HPROF gc_finish watcher", group="system")
+THREAD START (obj=50000308, id = 200001, name="main", group="main")
+THREAD START (obj=50002592, id = 200007, name="process reaper", group="system")
+THREAD START (obj=500025c9, id = 200008, name="Thread-2", group="main")
+THREAD END (id = 200008)
+THREAD START (obj=50002e1d, id = 200009, name="Timer for 'MapTask' metrics system", group="main")
+THREAD START (obj=50003481, id = 200010, name="IPC Client (1607207670) connection to /172.23.1.16:44829 from job_1397147117653_0180", group="main")
+THREAD START (obj=5000422a, id = 200011, name="IPC Parameter Sending Thread #0", group="main")
+THREAD START (obj=50005a9d, id = 200012, name="communication thread", group="main")
+THREAD START (obj=500025c9, id = 200013, name="Thread-6", group="main")
+THREAD END (id = 200013)
+THREAD START (obj=500025c9, id = 200014, name="Thread-7", group="main")
+THREAD END (id = 200014)
+THREAD START (obj=50003481, id = 200015, name="IPC Client (1607207670) connection to sandking00/172.23.1.130:9000 from hadoop", group="main")
+THREAD END (id = 200010)
+THREAD START (obj=50005f47, id = 200016, name="org.apache.hadoop.hdfs.PeerCache@24915432", group="main")
+THREAD START (obj=500060dc, id = 200017, name="SpillThread", group="main")
+THREAD START (obj=500061df, id = 200018, name="IPC Client (1607207670) connection to /172.23.1.16:44829 from job_1397147117653_0180", group="main")
+THREAD END (id = 200015)
+THREAD END (id = 200007)
+THREAD END (id = 200017)
+THREAD START (obj=5000422a, id = 200019, name="Readahead Thread #0", group="main")
+THREAD START (obj=5000422a, id = 200020, name="Readahead Thread #1", group="main")
+THREAD START (obj=5000422a, id = 200021, name="Readahead Thread #2", group="main")
+THREAD START (obj=5000422a, id = 200022, name="Readahead Thread #3", group="main")
+THREAD START (obj=50003481, id = 200023, name="IPC Client (1607207670) connection to sandking00/172.23.1.130:9000 from hadoop", group="main")
+THREAD END (id = 200012)
+THREAD END (id = 200018)
+THREAD START (obj=50006c8f, id = 200025, name="SIGTERM handler", group="system")
+THREAD START (obj=50001b9f, id = 200026, name="Thread-1", group="main")
+THREAD START (obj=50004fdc, id = 200027, name="Thread-5", group="main")
+THREAD END (id = 200026)
+THREAD END (id = 200023)
+THREAD END (id = 200009)
+THREAD END (id = 200001)
+THREAD START (obj=50006e15, id = 200028, name="DestroyJavaVM", group="main")
+THREAD END (id = 200027)
+THREAD END (id = 200025)
+TRACE 300000: (thread=200001)
+	<empty>
+TRACE 300001: (thread=200001)
+	java.lang.Thread.<init>(Thread.java:510)
+TRACE 300002: (thread=200001)
+	java.lang.Thread.<init>(Thread.java:234)
+TRACE 300003: (thread=200001)
+	java.lang.String.toCharArray(String.java:2753)
+	java.lang.Thread.init(Thread.java:394)
+	java.lang.Thread.<init>(Thread.java:511)
+TRACE 300006: (thread=200002)
+	<empty>
+TRACE 300004: (thread=200004)
+	com.sun.btrace.ThreadEnteredMap.enter(ThreadEnteredMap.java:162)
+	com.sun.btrace.BTraceRuntime.enter(BTraceRuntime.java:432)
+	com.sun.btrace.BTraceRuntime.enter(BTraceRuntime.java:443)
+	com.sun.btrace.agent.Client.transform(Client.java:143)
+TRACE 300005: (thread=200004)
+	java.lang.ref.Reference.<init>(Reference.java:233)
+	java.lang.ref.Reference.<init>(Reference.java:230)
+	java.lang.ref.WeakReference.<init>(WeakReference.java:57)
+	com.sun.btrace.ThreadEnteredMap.enter(ThreadEnteredMap.java:172)
+TRACE 300007: (thread=200004)
+	com.sun.btrace.org.objectweb.asm.ClassReader.<init>(<Unknown Source>:Unknown line)
+	com.sun.btrace.org.objectweb.asm.ClassReader.<init>(<Unknown Source>:Unknown line)
+	com.sun.btrace.runtime.ClassFilter.isCandidate(ClassFilter.java:131)
+	com.sun.btrace.agent.Client.transform(Client.java:160)
+TRACE 300008: (thread=200004)
+	com.sun.btrace.org.objectweb.asm.ClassReader.<init>(<Unknown Source>:Unknown line)
+	com.sun.btrace.org.objectweb.asm.ClassReader.<init

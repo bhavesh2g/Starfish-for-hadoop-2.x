@@ -121,6 +121,7 @@ OK	 * HANDLE MERGING
 	 * **********************************************************/
 	@TLS private static long mergerWriteFileDuration = 0l;
 	@TLS private static int mergerWriteFileCount = 0;
+	@TLS private static long mergerMergeDuration = 0l;
 	
 	// May not be executed, If this is only one file, we will execute sameVolRename and return (line 1807);
 	@OnMethod(clazz = "org.apache.hadoop.mapred.Merger", 
@@ -129,6 +130,13 @@ OK	 * HANDLE MERGING
 	public static void onMerger_writeFile_return(@Duration long duration) {
 		mergerWriteFileDuration += duration;
 		++mergerWriteFileCount;
+	}
+
+	@OnMethod(clazz = "org.apache.hadoop.mapred.Merger",
+			method = "merge",
+			location = @Location(value = Kind.RETURN))
+	public static void onMerger_merge_return(@Duration long duration) {
+		mergerMergeDuration += duration;
 	}
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$MapOutputBuffer", 
@@ -772,6 +780,19 @@ OK	 * SORT/MERGE MAP OUTPUT DATA
 			location = @Location(value = Kind.ENTRY))
 	public static void onMergeManagerImpl_finalMerge_entry() {
 		if (onReducer) {
+			println(strcat("MERGE\tMERGE_IN_MEMORY\t", str(mergerMergeDuration)));
+			println(strcat("MERGE\tREAD_WRITE\t", str(mergerWriteFileDuration)));
+			println(strcat("MERGE\tREAD_WRITE_COUNT\t", str(mergerWriteFileCount)));
+			println(strcat("MERGE\tCOMBINE\t", str(combinerTotalDuration)));
+			println(strcat("MERGE\tWRITE\t", str(combinerWriteDuration)));
+			println(strcat("MERGE\tUNCOMPRESS\t", str(uncompressDuration)));
+			println(strcat("MERGE\tCOMPRESS\t", str(compressDuration)));
+
+			mergerMergeDuration = 0l;
+			combinerTotalDuration = 0l;
+			combinerWriteDuration = 0l;
+			uncompressDuration = 0l;
+			compressDuration = 0l;
 			mergerWriteFileCount = 0;
 			mergerWriteFileDuration = 0l;
 		}
