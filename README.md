@@ -12,21 +12,17 @@
 Starfish is a self-tuning system for big data analytics built on hadoop. Visit the Duke University website for details. http://www.cs.duke.edu/starfish
 The old Starfish only works well on hadoop 1.x such as hadoop v0.20.x and v1.0 3. We are doing work to make Starfish works well with hadoop 2.x includs v0.23 and versions after v2.2.0 which is called Starfish2
 
-
 ###About Starfish
 ========================
 Please read the README file in /starfish/starfish/README to learn about the details of the original Starfish.
-
 
 ###Requirements
 ========================
 1. Starfish2 has been tested to work well on hadoop 2.2.0. It should also work on all the hadoop2.x version
 2. The MapReduce programs must be written using the new Hadoop API.
 
-
 ###Usage
 ========================
-
 #####Just make it work
 --------------------------
 1.	Use "ant compile" to compile the Starfish2 source code
@@ -46,7 +42,6 @@ Please read the README file in /starfish/starfish/README to learn about the deta
 6.	Run the ExecuteProfile.class which can be found in /starfish/starfish/build to get the profiles from stdouts, give the job id as parameter. (That is , if the application is called job_XXXXX_XX, then you should run the java class as "ExecuteProfile.class XXXXX_XX")
 7.	You shall get the results in /starfish/starfish/results
 
-
 ###New Directories
 ========================
 -bin2	:	Useful shell scripts for run Starfish2 and example for hadoop configuration
@@ -55,7 +50,6 @@ Notes	:	The java classes i've changed in src/profile are always renamed as OLD_C
 
 ###Schedule
 ========================
-
 /*****************************************************************************************
 * In Profiler Component, there are three steps:
 *	Gather and analyze the history of hadoop application
@@ -63,7 +57,6 @@ Notes	:	The java classes i've changed in src/profile are always renamed as OLD_C
 *	Get the data transfers if requested
 
 *****************************************************************************************/
-
 #####Done
 --------------
 1.	In Profiler Component, Use dynamic instrumentation tool BTrace to learn the profile of every single task
@@ -72,7 +65,6 @@ Notes	:	The java classes i've changed in src/profile are always renamed as OLD_C
 --------------
 1.	In Profiler Component, analyze the history of hadoop application
 2.	Complete the other three Components "What-if Engine", "Cost-based Optimizer", "Visualizer"
-
 
 ###BUGs Until now
 ==========================
