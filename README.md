@@ -33,13 +33,13 @@ Please read the README file in /starfish/starfish/README to learn about the deta
 8.  You shall get the results in /starfish/starfish/results
 
 ###New Directories
--bin2   :   Useful shell scripts for run Starfish2 and example for hadoop configuration
--results    :   Will keep the outputs of hadoop tasks and the generated profile
+* -bin2   :   Useful shell scripts for run Starfish2 and example for hadoop configuration
+* -results    :   Will keep the outputs of hadoop tasks and the generated profile
 Notes   :   The java classes i've changed in src/profile are always renamed as OLD_CLASS_NAME2
 
 ###Schedule
 /*****************************************************************************************
-* In Profiler Component, there are three steps:
+ In Profiler Component, there are three steps:
 *   Gather and analyze the history of hadoop application
 *   Use dynamic instrumentation tool BTrace to learn the profile of every single task
 *   Get the data transfers if requested
