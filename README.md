@@ -1,10 +1,11 @@
 Starfish2
+=======================
 Project	：Starfish-for-hadoop-2.x
 Author : WangYu @Tsinghua University
 Date : June 1st, 2014
 
 Discription
-=======================
+============
 Starfish is a self-tuning system for big data analytics built on hadoop. Visit the Duke University website for details. http://www.cs.duke.edu/starfish
 The old Starfish only works well on hadoop 1.x such as hadoop v0.20.x and v1.0 3. We are doing work to make Starfish works well with hadoop 2.x includs v0.23 and versions after v2.2.0 which is called Starfish2
 
