@@ -38,13 +38,12 @@ Please read the README file in /starfish/starfish/README to learn about the deta
 Notes   :   The java classes i've changed in src/profile are always renamed as OLD_CLASS_NAME2
 
 ###Schedule
-/*****************************************************************************************
- In Profiler Component, there are three steps:
+#####Description
+In Profiler Component, there are three steps:
 *   Gather and analyze the history of hadoop application
 *   Use dynamic instrumentation tool BTrace to learn the profile of every single task
 *   Get the data transfers if requested
 
-****************************************************************************************/
 #####Done
 1.  In Profiler Component, Use dynamic instrumentation tool BTrace to learn the profile of every single task
 
