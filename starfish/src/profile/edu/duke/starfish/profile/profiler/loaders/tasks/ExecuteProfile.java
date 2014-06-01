@@ -15,6 +15,15 @@ import java.util.Scanner;
 
 public class ExecuteProfile {
 
+	private class myFileFilter implements FileFilter{
+		public boolean accept(File pathname) {
+			if (pathname.getName().startsWith("container")) {
+				return true;
+			}
+			return false;
+		}
+	}
+
 	private String appId = "";
 	private String filePath = "/home/hadoop/starfish/starfish/results/";
 	private Configuration conf;
@@ -33,7 +42,7 @@ public class ExecuteProfile {
 		Configuration conf = new Configuration();
 		conf.addResource("/home/hadoop/hadoop-2.2.0/etc/hadoop/mapred-site.xml");
 		File files = new File(filePath);
-		File[] containers = files.listFiles();
+		File[] containers = files.listFiles(new myFileFilter());
 		int nMap = 0, nReduce = 0;
 		for (File container : containers) {
 			File oneFile = new File(container, "stdout");
@@ -59,15 +68,15 @@ public class ExecuteProfile {
 				System.out.println("Exception:" + e.getMessage());
 			}
 			MRMapProfile mapProfile;
-			MRMapProfileLoader mapLoader;
+			MRMapProfileLoader2 mapLoader;
 			MRReduceProfile reduceProfile;
-			MRReduceProfileLoader reduceLoader;
+			MRReduceProfileLoader2 reduceLoader;
 			MRTaskProfile taskProfile;
 			PrintStream ps;
 			if (isMap) {
 				System.out.println("isMap");
 				mapProfile = new MRMapProfile(oneFile.getAbsolutePath());
-				mapLoader = new MRMapProfileLoader(mapProfile, conf, oneFile.getAbsolutePath());
+				mapLoader = new MRMapProfileLoader2(mapProfile, conf, oneFile.getAbsolutePath());
 				try {
 					taskProfile = (MRTaskProfile)mapLoader.getProfile();
 					if (mapLoader.loadExecutionProfile(taskProfile)) {
@@ -89,7 +98,7 @@ public class ExecuteProfile {
 			if (isReduce) {
 				System.out.println("isReduce");
 				reduceProfile = new MRReduceProfile(oneFile.getAbsolutePath());
-				reduceLoader = new MRReduceProfileLoader(reduceProfile, conf, oneFile.getAbsolutePath());
+				reduceLoader = new MRReduceProfileLoader2(reduceProfile, conf, oneFile.getAbsolutePath());
 				try {
 					taskProfile = (MRTaskProfile)reduceLoader.getProfile();
 					if (reduceLoader.loadExecutionProfile(taskProfile)) {

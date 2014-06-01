@@ -271,6 +271,7 @@ OK	 * PERFORM MAP PROCESSING
 	@TLS private static long mapProcessingStartTime = 0l;
 	@TLS private static long mapInputKByteCount = 0l;
 	@TLS private static long mapInputVByteCount = 0l;
+	@TLS private static long mapInputPairCount = 0l;
 
 	@OnMethod(clazz = "org.apache.hadoop.mapreduce.Mapper", 
 			method = "run", 
@@ -290,7 +291,7 @@ OK	 * PERFORM MAP PROCESSING
 			if (v != null)
 				mapInputVByteCount += v.toString().getBytes("UTF-8").length;
 		}catch(Exception e) {}
-		
+		mapInputPairCount += 1l;
 		mapProcessingDuration += timeNanos() - mapProcessingStartTime;
 	}
         
@@ -304,12 +305,23 @@ OK	 * WRITE INTERMEDIATE MAP OUTPUT
 	@TLS private static long mapBufferCollectDuration = 0l;
 	@TLS private static long mapPartitionStartTime = 0l;
 	@TLS private static long mapPartitionDuration = 0l;
+	@TLS private static long mapOutputKByteCount = 0l;
+	@TLS private static long mapOutputVByteCount = 0l;
+	@TLS private static long mapOutputPairCount = 0l;
+
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewOutputCollector", 
 			method = "write", 
 			location = @Location(value = Kind.RETURN))
-	public static void onNewOutputCollector_write_return(@Duration long duration) {
+	public static void onNewOutputCollector_write_return(@Duration long duration, AnyType k, AnyType v) {
 		mapCollectorWriteDuration += duration;
+		try {
+			mapOutputPairCount += 1l;
+			if (k != null)
+				mapOutputKByteCount += k.toString().getBytes("UTF-8").length;
+			if (v != null)
+				mapOutputVByteCount += v.toString().getBytes("UTF-8").length;
+		} catch (Exception e) {}
 	}
 
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewOutputCollector", 
@@ -353,8 +365,7 @@ OK	 * WRITE INTERMEDIATE MAP OUTPUT
 OK	 * WRITE DIRECT MAP OUTPUT
 	 * **********************************************************/
 	@TLS private static long mapDirectOutputDuration = 0l;
-	@TLS private static long mapOutputKByteCount = 0l;
-	@TLS private static long mapOutputVByteCount = 0l;
+
 
 	// We execute NewOutputCollector above or NewDirectOutputCollector if reduceTasks == 0
 	@OnMethod(clazz = "org.apache.hadoop.mapred.MapTask$NewDirectOutputCollector", 
@@ -363,6 +374,7 @@ OK	 * WRITE DIRECT MAP OUTPUT
 	public static void onNewDirectOutputCollector_write_return(@Duration long duration, AnyType k, AnyType v) {
 		mapCollectorWriteDuration += duration;
  		try {
+ 			mapOutputPairCount += 1l;
 			if (k != null)
 				mapOutputKByteCount += k.toString().getBytes("UTF-8").length;
 			if (v != null)
@@ -496,6 +508,7 @@ OK	 * DONE WITH MAPPER EXECUTION
 		println(strcat("MAP\tUNCOMPRESS\t", str(uncompressDuration)));
 		println(strcat("MAP\tKEY_BYTE_COUNT\t", str(mapInputKByteCount)));
 		println(strcat("MAP\tVALUE_BYTE_COUNT\t", str(mapInputVByteCount)));
+		println(strcat("MAP\tINPUT_PAIR_COUNT\t", str(mapInputPairCount)));
 		println(strcat("MAP\tMAP\t", str(mapProcessingDuration)));
 		println(strcat("MAP\tWRITE\t", str(mapCollectorWriteDuration)));
 		println(strcat("MAP\tCOMPRESS\t", str(compressDuration)));
@@ -518,6 +531,7 @@ OK	 * DONE WITH MAPPER EXECUTION
 			println(strcat("MAP\tCOMPRESS\t", str(compressDuration)));
 			println(strcat("MAP\tKEY_BYTE_COUNT\t", str(mapOutputKByteCount)));
 			println(strcat("MAP\tVALUE_BYTE_COUNT\t", str(mapOutputVByteCount)));
+			println(strcat("MAP\tOUTPUT_PAIR_COUNT\t", str(mapOutputPairCount)));
 		}
 	}
 	

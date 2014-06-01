@@ -63,6 +63,8 @@ public abstract class MRTaskProfileLoader {
 	protected static final String SORT_COUNT = "SORT_COUNT";
 	protected static final String KEY_BYTE_COUNT = "KEY_BYTE_COUNT";
 	protected static final String VALUE_BYTE_COUNT = "VALUE_BYTE_COUNT";
+	protected static final String OUTPUT_PAIR_COUNT = "OUTPUT_PAIR_COUNT";
+	protected static final String INPUT_PAIR_COUNT = "INPUT_PAIR_COUNT";
 	protected static final String UNCOMPRESS_BYTE_COUNT = "UNCOMPRESS_BYTE_COUNT";
 	protected static final String COMPRESS_BYTE_COUNT = "COMPRESS_BYTE_COUNT";
 	protected static final String TRANSFER_COST = "TRANSFER_COST";

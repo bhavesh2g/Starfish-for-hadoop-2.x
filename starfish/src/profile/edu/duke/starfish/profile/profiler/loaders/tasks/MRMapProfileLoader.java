@@ -33,7 +33,7 @@ public class MRMapProfileLoader extends MRTaskProfileLoader {
 	private List<ProfileRecord> mergeRecords;
 
 	// CONSTANTS FOR THE MAP PHASE
-	private static final int NUM_MAP_PHASES = 21;
+	private static final int NUM_MAP_PHASES = 23;
 	private static final int POS_MAP_INPUT = 0;
 	private static final int POS_MAP_STARTUP_MEM = 1;
 	private static final int POS_MAP_SETUP = 2;
@@ -45,16 +45,18 @@ public class MRMapProfileLoader extends MRTaskProfileLoader {
 	private static final int POS_MAP_UNCOMPRESS = 8;
 	private static final int POS_MAP_INPUT_K_BYTE_COUNT = 9;
 	private static final int POS_MAP_INPUT_V_BYTE_COUNT = 10;
-	private static final int POS_MAP_MAP = 11;
-	private static final int POS_MAP_WRITE = 12;
-	private static final int POS_MAP_COMPRESS = 13;
-	private static final int POS_MAP_PARTITION_OUTPUT = 14;
-	private static final int POS_MAP_SERIALIZE_OUTPUT = 15;
-	private static final int POS_MAP_MEM = 16;
-	private static final int POS_MAP_DIR_WRITE = 17;
-	private static final int POS_MAP_DIR_COMPRESS = 18;
-	private static final int POS_MAP_OUTPUT_K_BYTE_COUNT = 19;
-	private static final int POS_MAP_OUTPUT_V_BYTE_COUNT = 20;
+	private static final int POS_MAP_INPUT_PAIR_COUNT = 11;
+	private static final int POS_MAP_MAP = 12;
+	private static final int POS_MAP_WRITE = 13;
+	private static final int POS_MAP_COMPRESS = 14;
+	private static final int POS_MAP_PARTITION_OUTPUT = 15;
+	private static final int POS_MAP_SERIALIZE_OUTPUT = 16;
+	private static final int POS_MAP_MEM = 17;
+	private static final int POS_MAP_DIR_WRITE = 18;
+	private static final int POS_MAP_DIR_COMPRESS = 19;
+	private static final int POS_MAP_OUTPUT_K_BYTE_COUNT = 20;
+	private static final int POS_MAP_OUTPUT_V_BYTE_COUNT = 21;
+	private static final int POS_MAP_OUTPUT_PAIR_COUNT = 22;
 
 	// CONSTANTS FOR THE SPILL PHASE
 	private static final int NUM_SPILL_PHASES = 8;
@@ -136,6 +138,12 @@ public class MRMapProfileLoader extends MRTaskProfileLoader {
 				.getCounter(MRCounter.MAP_INPUT_RECORDS, 1l);
 		long mapOutputPairs = profile.getCounter(MRCounter.MAP_OUTPUT_RECORDS,
 				0l);
+		// We didn't load history information, so we get these profiles from Btrace instead
+		// @author WangYu
+		mapInputPairs = (mapInputPairs == 1l) ? 
+			mapRecords.get(POS_MAP_INPUT_PAIR_COUNT).getValue() : mapInputPairs;
+		mapOutputPairs = (mapOutputPairs == 0l) ?
+			mapRecords.get(POS_MAP_OUTPUT_PAIR_COUNT).getValue() : mapOutputPairs;
 
 		// Calculate the number of map input bytes
 		if (mapInputBytes == 0) {
@@ -527,7 +535,7 @@ public class MRMapProfileLoader extends MRTaskProfileLoader {
 							.log((numRecsPerRed < 2) ? 2 : numRecsPerRed));
 			++numSpills;
 		}
-
+		
 		return sumCosts / numSpills;
 	}
 
@@ -665,6 +673,9 @@ public class MRMapProfileLoader extends MRTaskProfileLoader {
 				KEY_BYTE_COUNT) ? 0 : 1;
 		count += records.get(POS_MAP_OUTPUT_V_BYTE_COUNT).getProcess().equals(
 				VALUE_BYTE_COUNT) ? 0 : 1;
+		count += records.get(POS_MAP_OUTPUT_PAIR_COUNT).getProcess().equals(OUTPUT_PAIR_COUNT) ? 0 : 1;
+		count += records.get(POS_MAP_INPUT_PAIR_COUNT).getProcess().equals(INPUT_PAIR_COUNT) ? 0 : 1;
+
 
 		if (count != 0)
 			throw new ProfileFormatException(
