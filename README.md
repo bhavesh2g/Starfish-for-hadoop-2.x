@@ -1,8 +1,11 @@
 Starfish2
 =======================
 Project	：Starfish-for-hadoop-2.x
+---------------------------------------------
 Author : WangYu @Tsinghua University
+---------------------------------------------
 Date : June 1st, 2014
+---------------------------------------------
 
 Discription
 ============
@@ -59,6 +62,7 @@ Schedule
 *	Use dynamic instrumentation tool BTrace to learn the profile of every single task
 *	Get the data transfers if requested
 *****************************************************************************************/
+
 Hadoop 2.x is totally different from Hadoop 1.x
 
 Done
