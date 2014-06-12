@@ -1,0 +1,56 @@
+2014-05-18 16:53:22,333 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.retry.interval;  Ignoring.
+2014-05-18 16:53:22,337 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.attempts;  Ignoring.
+2014-05-18 16:53:22,693 INFO [main] org.apache.hadoop.metrics2.impl.MetricsConfig: loaded properties from hadoop-metrics2.properties
+2014-05-18 16:53:22,926 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: Scheduled snapshot period at 10 second(s).
+2014-05-18 16:53:22,926 INFO [main] org.apache.hadoop.metrics2.impl.MetricsSystemImpl: MapTask metrics system started
+2014-05-18 16:53:22,951 INFO [main] org.apache.hadoop.mapred.YarnChild: Executing with tokens:
+2014-05-18 16:53:22,951 INFO [main] org.apache.hadoop.mapred.YarnChild: Kind: mapreduce.job, Service: job_1397147117653_0151, Ident: (org.apache.hadoop.mapreduce.security.token.JobTokenIdentifier@8621fcc)
+2014-05-18 16:53:23,100 INFO [main] org.apache.hadoop.mapred.YarnChild: Sleeping for 0ms before retrying again. Got null now.
+2014-05-18 16:53:23,937 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.retry.interval;  Ignoring.
+2014-05-18 16:53:23,938 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.attempts;  Ignoring.
+2014-05-18 16:53:24,111 INFO [main] org.apache.hadoop.mapred.YarnChild: mapreduce.cluster.local.dir for child: /home/hadoop/temp/nm-local-dir/usercache/hadoop/appcache/application_1397147117653_0151
+2014-05-18 16:53:24,411 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.retry.interval;  Ignoring.
+2014-05-18 16:53:24,412 WARN [main] org.apache.hadoop.conf.Configuration: job.xml:an attempt to override final parameter: mapreduce.job.end-notification.max.attempts;  Ignoring.
+2014-05-18 16:53:24,547 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.task.id is deprecated. Instead, use mapreduce.task.attempt.id
+2014-05-18 16:53:24,548 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.task.is.map is deprecated. Instead, use mapreduce.task.ismap
+2014-05-18 16:53:24,548 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.tip.id is deprecated. Instead, use mapreduce.task.id
+2014-05-18 16:53:24,549 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.task.partition is deprecated. Instead, use mapreduce.task.partition
+2014-05-18 16:53:24,550 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.local.dir is deprecated. Instead, use mapreduce.cluster.local.dir
+2014-05-18 16:53:24,551 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: job.local.dir is deprecated. Instead, use mapreduce.job.local.dir
+2014-05-18 16:53:24,552 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: mapred.job.id is deprecated. Instead, use mapreduce.job.id
+2014-05-18 16:53:25,114 INFO [main] org.apache.hadoop.conf.Configuration.deprecation: session.id is deprecated. Instead, use dfs.metrics.session-id
+2014-05-18 16:53:25,727 INFO [main] org.apache.hadoop.mapred.Task:  Using ResourceCalculatorProcessTree : [ ]
+2014-05-18 16:53:26,087 INFO [main] org.apache.hadoop.mapred.MapTask: Processing split: hdfs://sandking00:9000/tmp/HiBench/Wordcount/Input/part-m-00005:268435456+134217728
+2014-05-18 16:53:26,156 INFO [main] org.apache.hadoop.mapred.MapTask: Map output collector class = org.apache.hadoop.mapred.MapTask$MapOutputBuffer
+2014-05-18 16:53:26,254 INFO [main] org.apache.hadoop.mapred.MapTask: (EQUATOR) 0 kvi 26214396(104857584)
+2014-05-18 16:53:26,254 INFO [main] org.apache.hadoop.mapred.MapTask: mapreduce.task.io.sort.mb: 100
+2014-05-18 16:53:26,254 INFO [main] org.apache.hadoop.mapred.MapTask: soft limit at 83886080
+2014-05-18 16:53:26,255 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 0; bufvoid = 104857600
+2014-05-18 16:53:26,255 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 26214396; length = 6553600
+2014-05-18 16:53:33,802 INFO [main] org.apache.hadoop.mapred.MapTask: Spilling map output
+2014-05-18 16:53:33,802 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 0; bufend = 40097143; bufvoid = 104857600
+2014-05-18 16:53:33,802 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 26214396(104857584); kvend = 15267164(61068656); length = 10947233/6553600
+2014-05-18 16:53:33,802 INFO [main] org.apache.hadoop.mapred.MapTask: (EQUATOR) 50582891 kvi 12645716(50582864)
+2014-05-18 16:53:41,071 INFO [SpillThread] org.apache.hadoop.mapred.MapTask: Finished spill 0
+2014-05-18 16:53:41,071 INFO [main] org.apache.hadoop.mapred.MapTask: (RESET) equator 50582891 kv 12645716(50582864) kvi 10024292(40097168)
+2014-05-18 16:53:44,816 INFO [main] org.apache.hadoop.mapred.MapTask: Spilling map output
+2014-05-18 16:53:44,817 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 50582891; bufend = 90682230; bufvoid = 104857600
+2014-05-18 16:53:44,817 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 12645716(50582864); kvend = 1699036(6796144); length = 10946681/6553600
+2014-05-18 16:53:44,817 INFO [main] org.apache.hadoop.mapred.MapTask: (EQUATOR) 101167979 kvi 25291988(101167952)
+2014-05-18 16:53:51,967 INFO [SpillThread] org.apache.hadoop.mapred.MapTask: Finished spill 1
+2014-05-18 16:53:51,967 INFO [main] org.apache.hadoop.mapred.MapTask: (RESET) equator 101167979 kv 25291988(101167952) kvi 22670564(90682256)
+2014-05-18 16:53:55,830 INFO [main] org.apache.hadoop.mapred.MapTask: Spilling map output
+2014-05-18 16:53:55,830 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 101167979; bufend = 36416689; bufvoid = 104857585
+2014-05-18 16:53:55,830 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 25291988(101167952); kvend = 14347052(57388208); length = 10944937/6553600
+2014-05-18 16:53:55,830 INFO [main] org.apache.hadoop.mapred.MapTask: (EQUATOR) 46902440 kvi 11725604(46902416)
+2014-05-18 16:54:02,602 INFO [SpillThread] org.apache.hadoop.mapred.MapTask: Finished spill 2
+2014-05-18 16:54:02,602 INFO [main] org.apache.hadoop.mapred.MapTask: (RESET) equator 46902440 kv 11725604(46902416) kvi 9104180(36416720)
+2014-05-18 16:54:05,371 INFO [main] org.apache.hadoop.mapred.MapTask: Starting flush of map output
+2014-05-18 16:54:05,371 INFO [main] org.apache.hadoop.mapred.MapTask: Spilling map output
+2014-05-18 16:54:05,371 INFO [main] org.apache.hadoop.mapred.MapTask: bufstart = 46902440; bufend = 85924328; bufvoid = 104857600
+2014-05-18 16:54:05,371 INFO [main] org.apache.hadoop.mapred.MapTask: kvstart = 11725604(46902416); kvend = 1074884(4299536); length = 10650721/6553600
+2014-05-18 16:54:10,935 INFO [main] org.apache.hadoop.mapred.MapTask: Finished spill 3
+2014-05-18 16:54:10,955 INFO [main] org.apache.hadoop.mapred.Merger: Merging 4 sorted segments
+2014-05-18 16:54:10,965 INFO [main] org.apache.hadoop.mapred.Merger: Down to the last merge-pass, with 4 segments left of total size: 66592 bytes
+2014-05-18 16:54:11,107 INFO [main] org.apache.hadoop.mapred.Task: Task:attempt_1397147117653_0151_m_000077_0 is done. And is in the process of committing
+2014-05-18 16:54:11,212 INFO [main] org.apache.hadoop.mapred.Task: Task 'attempt_1397147117653_0151_m_000077_0' done.

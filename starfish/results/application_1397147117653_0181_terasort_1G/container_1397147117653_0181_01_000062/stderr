@@ -1,0 +1,10 @@
+java.lang.InterruptedException
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireInterruptibly(AbstractQueuedSynchronizer.java:1219)
+	at java.util.concurrent.locks.ReentrantLock.lockInterruptibly(ReentrantLock.java:340)
+	at java.util.concurrent.LinkedBlockingQueue.put(LinkedBlockingQueue.java:338)
+	at com.sun.btrace.BTraceRuntime.send(BTraceRuntime.java:2032)
+	at com.sun.btrace.BTraceRuntime.send(BTraceRuntime.java:2024)
+	at com.sun.btrace.BTraceRuntime.println(BTraceRuntime.java:1357)
+	at com.sun.btrace.BTraceUtils.println(BTraceUtils.java:1075)
+	at org.apache.hadoop.mapreduce.task.reduce.Fetcher.$btrace$HadoopBTrace$onShuffleSchedulerImpl_freeHost_entry(Fetcher.java)
+	at org.apache.hadoop.mapreduce.task.reduce.Fetcher.run(Fetcher.java:165)
